@@ -47,6 +47,12 @@ import { briefing as yfinance } from './sources/yfinance.mjs';
 import { briefing as cisaKev } from './sources/cisa-kev.mjs';
 import { briefing as cloudflareRadar } from './sources/cloudflare-radar.mjs';
 
+// === Tier 7: Chile Portfolio ===
+import { briefing as chileUsdclp } from './sources/chile-usdclp.mjs';
+import { briefing as chileCopper } from './sources/chile-copper.mjs';
+import { briefing as chileDap } from './sources/chile-dap.mjs';
+import { briefing as portfolioTracker } from './sources/portfolio-tracker.mjs';
+
 const SOURCE_TIMEOUT_MS = 30_000; // 30s max per individual source
 
 export async function runSource(name, fn, ...args) {
@@ -67,7 +73,7 @@ export async function runSource(name, fn, ...args) {
 }
 
 export async function fullBriefing() {
-  console.error('[Crucix] Starting intelligence sweep — 29 sources...');
+  console.error('[Crucix] Starting intelligence sweep — 33 sources...');
   const start = Date.now();
 
   const allPromises = [
@@ -111,6 +117,12 @@ export async function fullBriefing() {
     // Tier 6: Cyber & Infrastructure
     runSource('CISA-KEV', cisaKev),
     runSource('Cloudflare-Radar', cloudflareRadar),
+
+    // Tier 7: Chile Portfolio
+    runSource('Chile-USDCLP', chileUsdclp),
+    runSource('Chile-Copper', chileCopper),
+    runSource('Chile-DAP', chileDap),
+    runSource('Portfolio-Tracker', portfolioTracker),
   ];
 
   // Each runSource has its own 30s timeout, so allSettled will resolve

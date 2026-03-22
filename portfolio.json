@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "owner": "Jubilado Chile",
+    "total_clp": 40000000,
+    "last_updated": "2026-03-22",
+    "rebalance_band_pct": 5
+  },
+  "allocations": [
+    {
+      "asset_class": "dap_clp",
+      "name": "DAP CLP",
+      "target_pct": 30,
+      "positions": [
+        {
+          "name": "DAP CLP 30d — Banco Internacional",
+          "type": "dap",
+          "currency": "CLP",
+          "amount_clp": 4000000,
+          "rate_annual_pct": 5.2,
+          "entry_date": "2026-03-01",
+          "maturity_date": "2026-03-31",
+          "term_days": 30
+        },
+        {
+          "name": "DAP CLP 90d — BTG Pactual",
+          "type": "dap",
+          "currency": "CLP",
+          "amount_clp": 4000000,
+          "rate_annual_pct": 5.5,
+          "entry_date": "2026-02-01",
+          "maturity_date": "2026-05-02",
+          "term_days": 90
+        },
+        {
+          "name": "DAP CLP 180d — BICE",
+          "type": "dap",
+          "currency": "CLP",
+          "amount_clp": 4000000,
+          "rate_annual_pct": 5.8,
+          "entry_date": "2026-01-01",
+          "maturity_date": "2026-06-30",
+          "term_days": 180
+        }
+      ]
+    },
+    {
+      "asset_class": "fm_uf",
+      "name": "FM Renta Fija UF",
+      "target_pct": 25,
+      "positions": [
+        {
+          "name": "Fondo Mutuo Renta Fija UF",
+          "type": "fund",
+          "currency": "CLP",
+          "amount_clp": 10000000,
+          "entry_date": "2026-01-15",
+          "notes": "Valor cuota se ajusta por UF, no tiene ticker Yahoo"
+        }
+      ]
+    },
+    {
+      "asset_class": "dap_usd",
+      "name": "DAP USD",
+      "target_pct": 15,
+      "positions": [
+        {
+          "name": "DAP USD 90d — Banco Internacional",
+          "type": "dap",
+          "currency": "USD",
+          "amount_usd": 6300,
+          "amount_clp": 6000000,
+          "rate_annual_pct": 4.5,
+          "entry_date": "2026-02-15",
+          "maturity_date": "2026-05-16",
+          "term_days": 90,
+          "entry_usdclp": 952
+        }
+      ]
+    },
+    {
+      "asset_class": "etf_intl",
+      "name": "ETFs Internacionales",
+      "target_pct": 15,
+      "positions": [
+        {
+          "name": "SPDR S&P 500",
+          "type": "etf",
+          "ticker": "SPY",
+          "currency": "USD",
+          "quantity": 3,
+          "entry_price_usd": 525.0,
+          "entry_date": "2026-01-20",
+          "entry_usdclp": 952
+        },
+        {
+          "name": "Schwab US Dividend Equity",
+          "type": "etf",
+          "ticker": "SCHD",
+          "currency": "USD",
+          "quantity": 25,
+          "entry_price_usd": 80.0,
+          "entry_date": "2026-01-20",
+          "entry_usdclp": 952
+        },
+        {
+          "name": "VanEck Semiconductor",
+          "type": "etf",
+          "ticker": "SMH",
+          "currency": "USD",
+          "quantity": 6,
+          "entry_price_usd": 230.0,
+          "entry_date": "2026-01-20",
+          "entry_usdclp": 952
+        },
+        {
+          "name": "iShares 20+ Year Treasury",
+          "type": "etf",
+          "ticker": "TLT",
+          "currency": "USD",
+          "quantity": 10,
+          "entry_price_usd": 88.0,
+          "entry_date": "2026-01-20",
+          "entry_usdclp": 952
+        }
+      ]
+    },
+    {
+      "asset_class": "acc_chile",
+      "name": "Acciones Chile",
+      "target_pct": 10,
+      "positions": [
+        {
+          "name": "IT Now IPSA ETF",
+          "type": "etf",
+          "ticker": "^IPSA",
+          "currency": "CLP",
+          "quantity": 200,
+          "entry_price_clp": 7500,
+          "entry_date": "2026-01-20",
+          "notes": "Using ^IPSA index as proxy — no ETF ticker available on Yahoo"
+        },
+        {
+          "name": "Banco de Chile",
+          "type": "stock",
+          "ticker": "CHILE.SN",
+          "currency": "CLP",
+          "quantity": 15000,
+          "entry_price_clp": 115,
+          "entry_date": "2026-01-20"
+        },
+        {
+          "name": "Enel Chile",
+          "type": "stock",
+          "ticker": "ENELCHILE.SN",
+          "currency": "CLP",
+          "quantity": 20000,
+          "entry_price_clp": 32,
+          "entry_date": "2026-01-20"
+        }
+      ]
+    },
+    {
+      "asset_class": "cash",
+      "name": "Reserva Líquida",
+      "target_pct": 5,
+      "positions": [
+        {
+          "name": "Cuenta corriente CLP",
+          "type": "cash",
+          "currency": "CLP",
+          "amount_clp": 2000000
+        }
+      ]
+    }
+  ]
+}

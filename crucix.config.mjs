@@ -35,6 +35,12 @@ export default {
         // Example overrides (uncomment to customize):
         // vix: 3,       // more sensitive to VIX moves
         // wti: 5,       // less sensitive to oil moves
+
+        // Chile Portfolio thresholds
+        usdclp: 2,           // 2% daily change triggers alert
+        copper: 5,           // 5% weekly change triggers alert
+        tpm: 0.01,           // any TPM change triggers alert
+        portfolio_total: 3,  // 3% total portfolio value change
       },
       count: {
         // urgent_posts: 3,     // need ±3 urgent posts to flag
