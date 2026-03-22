@@ -321,6 +321,21 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 /* IDEA HORIZON BADGE */
 .idea-horizon{font-family:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;padding:1px 5px;border:1px solid rgba(100,240,200,0.15);color:var(--dim);margin-left:6px}
 
+/* === PORTFOLIO ZONE (hero section) === */
+#portfolioZone{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:10px;margin-top:10px;padding-bottom:4px}
+#portfolioZone .g-panel{border-top:2px solid var(--accent)}
+.pf-hero-val{font-family:var(--mono);font-size:28px;font-weight:700;letter-spacing:-0.03em;color:var(--accent)}
+.pf-hero-change{font-family:var(--mono);font-size:14px;margin-left:8px}
+.pf-hero-change.up{color:var(--accent)}
+.pf-hero-change.down{color:var(--danger)}
+.pf-macro-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.pf-macro-item{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.pf-macro-item .pf-mv{color:var(--text);font-weight:500;margin-left:3px}
+.section-divider{display:flex;align-items:center;gap:12px;margin:8px 0 2px;padding:0 4px}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(100,240,200,0.12),transparent)}
+.section-divider span{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--dim);white-space:nowrap;opacity:0.6}
+@media(max-width:900px){#portfolioZone{grid-template-columns:1fr}}
+
 /* === CHILE PORTFOLIO === */
 .chile-val{font-family:var(--mono);font-size:16px;font-weight:600;letter-spacing:-0.02em}
 .chile-total{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-0.02em;color:var(--accent)}
@@ -366,6 +381,8 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 <div class="scanline" id="scanline"></div>
 <div id="main">
   <div class="topbar" id="topbar"></div>
+  <div id="portfolioZone"></div>
+  <div class="section-divider"><span>INTELIGENCIA OSINT</span></div>
   <div class="grid">
     <div class="col" id="leftRail"></div>
     <div class="col" id="centerCol">
@@ -635,6 +652,107 @@ function renderTopbar(){
   renderRegionControls();
 }
 
+// === PORTFOLIO ZONE (hero section) ===
+function renderPortfolio(){
+  const c = D.chile;
+  const el = document.getElementById('portfolioZone');
+  if(!el || !c || !c.portfolio) { if(el) el.style.display='none'; return; }
+  el.style.display='';
+  const p = c.portfolio;
+  const fmtClp = (n) => Math.round(n).toLocaleString('es-CL');
+  const totalM = (p.totalValueClp / 1000000).toFixed(1);
+  const chgClass = p.totalChangePct >= 0 ? 'up' : 'down';
+  const chgSign = p.totalChangePct >= 0 ? '+' : '';
+  const usd = c.usdclp?.current;
+  const usdChg = c.usdclp?.change_pct;
+  const cu = c.copper?.price_usd_lb;
+  const cuChg7d = c.copper?.change_7d_pct;
+  const uf = c.indicators?.uf?.value;
+  const tpm = c.indicators?.tpm?.value;
+
+  // USD/CLP sparkline from 30d history
+  const usdHist = (c.usdclp?.history_30d || []).map(h => h.close).filter(Boolean);
+  const usdMax = Math.max(...usdHist), usdMin = Math.min(...usdHist);
+  const sparkHtml = usdHist.length > 2 ? `<div class="spark" style="height:24px;margin-top:6px">${usdHist.map(v => {
+    const pct = usdMax===usdMin ? 50 : ((v-usdMin)/(usdMax-usdMin))*100;
+    return '<div class="spark-bar" style="height:'+Math.max(pct,5)+'%"></div>';
+  }).join('')}</div>` : '';
+
+  // Panel 1: Resumen + Macro
+  const panel1 = `<div class="g-panel">
+    <div class="sec-head"><h3>${t('chile.portfolio','Portafolio Chile')}</h3><span class="badge">${t('badges.live','LIVE')}</span></div>
+    <div style="display:flex;align-items:baseline">
+      <span class="pf-hero-val">$${totalM}M</span>
+      <span class="pf-hero-change ${chgClass}">${chgSign}${p.totalChangePct}%</span>
+    </div>
+    <div class="pf-macro-row">
+      <div class="pf-macro-item">USD/CLP <span class="pf-mv" style="color:${Math.abs(usdChg||0)>2?'var(--warn)':'var(--accent)'}">${usd||'--'}</span></div>
+      <div class="pf-macro-item">Cobre <span class="pf-mv" style="color:${(cuChg7d||0)<-5?'var(--danger)':'var(--text)'}">$${cu||'--'}/lb</span></div>
+      <div class="pf-macro-item">UF <span class="pf-mv">${uf?fmtClp(uf):'--'}</span></div>
+      <div class="pf-macro-item">TPM <span class="pf-mv">${tpm!=null?tpm+'%':'--'}</span></div>
+    </div>
+    ${sparkHtml?`<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px">USD/CLP 30d</div>${sparkHtml}`:''}
+  </div>`;
+
+  // Panel 2: Allocation + Posiciones
+  const alloc = p.allocation || {};
+  const allocOrder = ['dap_clp','fm_uf','dap_usd','etf_intl','acc_chile','cash'];
+  const allocColors = {dap_clp:'var(--accent)',fm_uf:'#44ccff',dap_usd:'#a78bfa',etf_intl:'#ffb84c',acc_chile:'#ff5f63',cash:'#666'};
+  const allocBar = allocOrder.map(k => {
+    const a = alloc[k]; if(!a) return '';
+    return `<div class="chile-alloc-seg" data-class="${k}" style="width:${a.current_pct}%" title="${a.name}: ${a.current_pct}% (obj ${a.target_pct}%)"></div>`;
+  }).join('');
+  const legendItems = [{c:'var(--accent)',l:'DAP CLP'},{c:'#44ccff',l:'FM UF'},{c:'#a78bfa',l:'DAP USD'},{c:'#ffb84c',l:'ETF Intl'},{c:'#ff5f63',l:'Acc CL'},{c:'#666',l:'Cash'}];
+  const legend = legendItems.map(x=>`<div class="chile-legend-item"><div class="chile-legend-dot" style="background:${x.c}"></div>${x.l}</div>`).join('');
+
+  const allocRows = allocOrder.map(k => {
+    const a = alloc[k]; if(!a) return '';
+    const deltaClr = Math.abs(a.delta) > 5 ? 'var(--danger)' : Math.abs(a.delta) > 3 ? 'var(--warn)' : 'var(--dim)';
+    return `<div class="chile-pos-row"><span style="width:6px;height:6px;border-radius:1px;background:${allocColors[k]};flex-shrink:0;margin-right:4px"></span><span class="chile-pos-name">${a.name}</span><span style="min-width:35px;text-align:right;font-family:var(--mono);font-size:9px;color:var(--dim)">${a.target_pct}%</span><span style="min-width:35px;text-align:right;font-family:var(--mono);font-size:9px;color:var(--text)">${a.current_pct}%</span><span style="min-width:40px;text-align:right;font-family:var(--mono);font-size:9px;color:${deltaClr}">${a.delta>0?'+':''}${a.delta}%</span></div>`;
+  }).join('');
+
+  const positions = (p.positions || []).filter(pos => pos.ticker);
+  const posRows = positions.map(pos => {
+    const glClr = pos.gain_loss_pct > 0 ? 'var(--accent)' : pos.gain_loss_pct < 0 ? 'var(--danger)' : 'var(--dim)';
+    const glSign = pos.gain_loss_pct > 0 ? '+' : '';
+    return `<div class="chile-pos-row"><span class="chile-pos-name" title="${pos.name}">${pos.ticker}</span><span class="chile-pos-val">$${pos.current_price||'--'}</span><span class="chile-pos-gl" style="color:${glClr}">${pos.gain_loss_pct!=null?(glSign+pos.gain_loss_pct+'%'):'--'}</span></div>`;
+  }).join('');
+
+  const corr = c.copperCorrelation?.copper_vs_usdclp_7d;
+
+  const panel2 = `<div class="g-panel">
+    <div class="sec-head"><h3>${t('chile.allocation','ASIGNACIÓN')}</h3><span class="badge">${t('chile.positions','POSICIONES')}</span></div>
+    <div class="chile-alloc-bar">${allocBar}</div>
+    <div class="chile-legend">${legend}</div>
+    <div style="margin-top:6px;font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.5px;margin-bottom:2px">${t('chile.targetActualDelta','OBJETIVO → ACTUAL → DELTA')}</div>
+    ${allocRows}
+    ${positions.length ? `<div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.5px;margin-bottom:2px">${t('chile.positions','POSICIONES')}</div>${posRows}` : ''}
+    ${corr != null ? `<div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--dim)">${t('chile.copperCorrelation','CORR COBRE-CLP')}: <span style="color:${corr > 0.3 ? 'var(--warn)' : 'var(--accent)'}">${corr > 0 ? '+' : ''}${corr}</span> <span style="font-size:8px">${corr < -0.3 ? t('chile.normal','Normal') : corr > 0.3 ? t('chile.divergence','Divergencia!') : t('chile.neutral','Neutral')}</span></div>` : ''}
+  </div>`;
+
+  // Panel 3: DAPs + Alertas
+  const daps = (c.dap?.portfolioDaps || []).filter(d => !d.error);
+  const dapRows = daps.map(d => {
+    const daysClass = d.days_remaining <= 7 ? 'soon' : d.days_remaining < 0 ? 'matured' : '';
+    const daysText = d.days_remaining < 0 ? t('chile.matured','VENCIDO') : d.days_remaining + t('chile.days','d');
+    return `<div class="chile-dap-row"><span class="chile-dap-name" title="${d.name}">${d.name}</span><span style="min-width:30px;text-align:right;color:var(--dim);font-size:9px">${d.rate_annual_pct}%</span><span class="chile-dap-days ${daysClass}">${daysText}</span></div>`;
+  }).join('');
+
+  const sigs = (c.signals||[]).filter(s=>s.type!=='tpm_current').slice(0,5).map(s=>{
+    const cls = s.severity === 'high' ? 'high' : s.severity === 'medium' ? 'medium' : 'info';
+    return `<div class="chile-signal-card ${cls}">${s.message}</div>`;
+  }).join('');
+
+  const panel3 = `<div class="g-panel">
+    <div class="sec-head"><h3>${t('chile.dapTracker','TRACKER DAP')}</h3><span class="badge">${t('chile.chileAlerts','ALERTAS')}</span></div>
+    ${dapRows || `<div style="font-family:var(--mono);font-size:9px;color:var(--dim)">${t('chile.noDaps','Sin DAPs')}</div>`}
+    ${sigs ? `<div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.5px;margin-bottom:4px">${t('chile.chileAlerts','ALERTAS')}</div>${sigs}` : '<div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--dim);opacity:0.6">Sin alertas activas</div>'}
+    <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);opacity:0.4">${t('chile.disclosure','Herramienta de monitoreo. No es asesoría financiera.')}</div>
+  </div>`;
+
+  el.innerHTML = panel1 + panel2 + panel3;
+}
+
 // === LEFT RAIL ===
 function renderLeftRail(){
   const totalAir=D.air.reduce((s,a)=>s+a.total,0);
@@ -695,8 +813,7 @@ function renderLeftRail(){
         ${Object.entries(D.space.militaryByCountry||{}).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([c,n])=>`<div class="econ-row"><span class="elabel" style="padding-left:8px">${c}</span><span class="eval" style="font-size:10px">${n} mil sats</span></div>`).join('')}
         ${(D.space.signals||[]).length ? `<div style="margin-top:6px;padding:6px 8px;border:1px solid rgba(68,204,255,0.2);background:rgba(68,204,255,0.04);font-family:var(--mono);font-size:9px;color:var(--accent2);line-height:1.5">${D.space.signals.slice(0,2).join('<br>')}</div>` : ''}
       ` : '<div style="font-family:var(--mono);font-size:10px;color:var(--dim)">NO SPACE DATA</div>'}
-    </div>
-    ${renderChilePanel()}`;
+    </div>`;
 }
 
 function renderChilePanel(){
@@ -1562,8 +1679,7 @@ function renderLower(){
       ${ideasHtml}
       <div class="disclosure">FOR INFORMATIONAL PURPOSES ONLY. This is not financial advice, a recommendation to buy or sell any security, or a solicitation of any kind. All signal-based observations are derived from publicly available OSINT data and should not be relied upon for investment decisions. Consult a licensed financial advisor before making any investment. Past performance does not guarantee future results.</div>
     </div>`;
-  const chilePanel = renderChileLowerPanel();
-  document.getElementById('lowerGrid').innerHTML=`${tickerPanel}${osintPanel}${macroPanel}${chilePanel||ideasPanel}`;
+  document.getElementById('lowerGrid').innerHTML=`${tickerPanel}${osintPanel}${macroPanel}${ideasPanel}`;
 }
 
 function renderChileLowerPanel(){
@@ -1851,6 +1967,7 @@ function syncResponsiveLayout(force=false){
   if(force || lastResponsiveMobile === null || mobileNow !== lastResponsiveMobile){
     lastResponsiveMobile = mobileNow;
     renderTopbar();
+    renderPortfolio();
     renderLeftRail();
     renderLower();
     renderRight();
@@ -1860,7 +1977,7 @@ function syncResponsiveLayout(force=false){
 
 // === REINIT (for live updates without boot sequence) ===
 function reinit(){
-  renderTopbar();renderLeftRail();renderLower();renderRight();
+  renderTopbar();renderPortfolio();renderLeftRail();renderLower();renderRight();
   plotMarkers();
 }
 
@@ -1899,7 +2016,7 @@ function connectSSE(){
 // === INIT ===
 let booted = false;
 function init(){
-  renderTopbar();renderLeftRail();renderLower();renderRight();
+  renderTopbar();renderPortfolio();renderLeftRail();renderLower();renderRight();
   renderGlossary();
   initMap();
   if (!booted) { runBoot(); booted = true; }
