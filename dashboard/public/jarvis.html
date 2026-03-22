@@ -320,6 +320,39 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 
 /* IDEA HORIZON BADGE */
 .idea-horizon{font-family:var(--mono);font-size:8px;letter-spacing:0.08em;text-transform:uppercase;padding:1px 5px;border:1px solid rgba(100,240,200,0.15);color:var(--dim);margin-left:6px}
+
+/* === CHILE PORTFOLIO === */
+.chile-val{font-family:var(--mono);font-size:16px;font-weight:600;letter-spacing:-0.02em}
+.chile-total{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-0.02em;color:var(--accent)}
+.chile-change{font-family:var(--mono);font-size:11px;margin-left:6px}
+.chile-change.up{color:var(--accent)}
+.chile-change.down{color:var(--danger)}
+.chile-alloc-bar{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:6px 0;border:1px solid var(--border)}
+.chile-alloc-seg{height:100%;position:relative;transition:width 0.4s}
+.chile-alloc-seg:hover{opacity:0.8}
+.chile-alloc-seg[data-class="dap_clp"]{background:var(--accent)}
+.chile-alloc-seg[data-class="fm_uf"]{background:#44ccff}
+.chile-alloc-seg[data-class="dap_usd"]{background:#a78bfa}
+.chile-alloc-seg[data-class="etf_intl"]{background:#ffb84c}
+.chile-alloc-seg[data-class="acc_chile"]{background:#ff5f63}
+.chile-alloc-seg[data-class="cash"]{background:#666}
+.chile-legend{display:flex;flex-wrap:wrap;gap:6px 10px;margin:4px 0}
+.chile-legend-item{display:flex;align-items:center;gap:3px;font-family:var(--mono);font-size:8px;color:var(--dim)}
+.chile-legend-dot{width:6px;height:6px;border-radius:1px}
+.chile-signal-card{padding:5px 7px;margin-top:4px;font-family:var(--mono);font-size:9px;line-height:1.4;border-left:2px solid;background:rgba(0,0,0,0.2)}
+.chile-signal-card.high{border-color:var(--danger);color:var(--danger)}
+.chile-signal-card.medium{border-color:var(--warn);color:var(--warn)}
+.chile-signal-card.info{border-color:var(--accent);color:var(--accent)}
+.chile-dap-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-family:var(--mono);font-size:9px;border-bottom:1px solid rgba(100,240,200,0.06)}
+.chile-dap-row:last-child{border-bottom:none}
+.chile-dap-name{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chile-dap-days{min-width:50px;text-align:right}
+.chile-dap-days.soon{color:var(--warn)}
+.chile-dap-days.matured{color:var(--danger)}
+.chile-pos-row{display:flex;justify-content:space-between;padding:2px 0;font-family:var(--mono);font-size:9px;border-bottom:1px solid rgba(100,240,200,0.04)}
+.chile-pos-name{flex:1;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chile-pos-val{min-width:65px;text-align:right;color:var(--text)}
+.chile-pos-gl{min-width:50px;text-align:right}
 </style>
 </head>
 <body>
@@ -662,7 +695,64 @@ function renderLeftRail(){
         ${Object.entries(D.space.militaryByCountry||{}).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([c,n])=>`<div class="econ-row"><span class="elabel" style="padding-left:8px">${c}</span><span class="eval" style="font-size:10px">${n} mil sats</span></div>`).join('')}
         ${(D.space.signals||[]).length ? `<div style="margin-top:6px;padding:6px 8px;border:1px solid rgba(68,204,255,0.2);background:rgba(68,204,255,0.04);font-family:var(--mono);font-size:9px;color:var(--accent2);line-height:1.5">${D.space.signals.slice(0,2).join('<br>')}</div>` : ''}
       ` : '<div style="font-family:var(--mono);font-size:10px;color:var(--dim)">NO SPACE DATA</div>'}
-    </div>`;
+    </div>
+    ${renderChilePanel()}`;
+}
+
+function renderChilePanel(){
+  const c = D.chile;
+  if(!c || !c.portfolio) return '';
+  const p = c.portfolio;
+  const usd = c.usdclp?.current;
+  const usdChg = c.usdclp?.change_pct;
+  const cu = c.copper?.price_usd_lb;
+  const cuChg7d = c.copper?.change_7d_pct;
+  const uf = c.indicators?.uf?.value;
+  const tpm = c.indicators?.tpm?.value;
+
+  const totalM = (p.totalValueClp / 1000000).toFixed(1);
+  const chgClass = p.totalChangePct >= 0 ? 'up' : 'down';
+  const chgSign = p.totalChangePct >= 0 ? '+' : '';
+
+  // Allocation bar
+  const alloc = p.allocation || {};
+  const allocOrder = ['dap_clp','fm_uf','dap_usd','etf_intl','acc_chile','cash'];
+  const allocBar = allocOrder.map(k => {
+    const a = alloc[k];
+    if(!a) return '';
+    return `<div class="chile-alloc-seg" data-class="${k}" style="width:${a.current_pct}%" title="${a.name}: ${a.current_pct}% (target ${a.target_pct}%)"></div>`;
+  }).join('');
+
+  const legendItems = [
+    {c:'var(--accent)',l:'DAP CLP'},{c:'#44ccff',l:'FM UF'},{c:'#a78bfa',l:'DAP USD'},
+    {c:'#ffb84c',l:'ETF Intl'},{c:'#ff5f63',l:'Acc CL'},{c:'#666',l:'Cash'}
+  ];
+  const legend = legendItems.map(x=>`<div class="chile-legend-item"><div class="chile-legend-dot" style="background:${x.c}"></div>${x.l}</div>`).join('');
+
+  // Signals
+  const sigs = (c.signals||[]).filter(s=>s.type!=='tpm_current').slice(0,4).map(s=>{
+    const cls = s.severity === 'high' ? 'high' : s.severity === 'medium' ? 'medium' : 'info';
+    return `<div class="chile-signal-card ${cls}">${s.message}</div>`;
+  }).join('');
+
+  // Format number with dots for Chilean convention
+  const fmtClp = (n) => Math.round(n).toLocaleString('es-CL');
+
+  return `<div class="g-panel">
+    <div class="sec-head"><h3>Chile Portfolio</h3><span class="badge">LIVE</span></div>
+    <div style="display:flex;align-items:baseline;margin-bottom:6px">
+      <span class="chile-total">$${totalM}M</span>
+      <span class="chile-change ${chgClass}">${chgSign}${p.totalChangePct}%</span>
+    </div>
+    <div class="econ-row"><span class="elabel">USD/CLP</span><span class="eval" style="color:${Math.abs(usdChg||0)>2?'var(--warn)':'var(--accent)'}">${usd||'--'} <span style="font-size:9px;color:var(--dim)">${usdChg?((usdChg>0?'+':'')+usdChg+'%'):''}</span></span></div>
+    <div class="econ-row"><span class="elabel">Cobre</span><span class="eval" style="color:${(cuChg7d||0)<-5?'var(--danger)':'var(--text)'}">$${cu||'--'}/lb <span style="font-size:9px;color:var(--dim)">${cuChg7d?((cuChg7d>0?'+':'')+cuChg7d+'% 7d'):''}</span></span></div>
+    <div class="econ-row"><span class="elabel">UF</span><span class="eval">${uf?fmtClp(uf):'--'}</span></div>
+    <div class="econ-row"><span class="elabel">TPM</span><span class="eval">${tpm!=null?tpm+'%':'--'}</span></div>
+    <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px">ALLOCATION</div>
+    <div class="chile-alloc-bar">${allocBar}</div>
+    <div class="chile-legend">${legend}</div>
+    ${sigs?`<div style="margin-top:6px">${sigs}</div>`:''}
+  </div>`;
 }
 
 // === MAP ===
@@ -1472,7 +1562,80 @@ function renderLower(){
       ${ideasHtml}
       <div class="disclosure">FOR INFORMATIONAL PURPOSES ONLY. This is not financial advice, a recommendation to buy or sell any security, or a solicitation of any kind. All signal-based observations are derived from publicly available OSINT data and should not be relied upon for investment decisions. Consult a licensed financial advisor before making any investment. Past performance does not guarantee future results.</div>
     </div>`;
-  document.getElementById('lowerGrid').innerHTML=`${tickerPanel}${osintPanel}${macroPanel}${ideasPanel}`;
+  const chilePanel = renderChileLowerPanel();
+  document.getElementById('lowerGrid').innerHTML=`${tickerPanel}${osintPanel}${macroPanel}${chilePanel||ideasPanel}`;
+}
+
+function renderChileLowerPanel(){
+  const c = D.chile;
+  if(!c || !c.portfolio) return '';
+  const p = c.portfolio;
+  const alloc = p.allocation || {};
+  const fmtClp = (n) => Math.round(n).toLocaleString('es-CL');
+
+  // DAP maturity tracker
+  const daps = (c.dap?.portfolioDaps || []).filter(d => !d.error);
+  const dapRows = daps.map(d => {
+    const daysClass = d.days_remaining <= 7 ? 'soon' : d.days_remaining < 0 ? 'matured' : '';
+    const daysText = d.days_remaining < 0 ? 'VENCIDO' : d.days_remaining + 'd';
+    return `<div class="chile-dap-row">
+      <span class="chile-dap-name" title="${d.name}">${d.name}</span>
+      <span style="min-width:35px;text-align:right;color:var(--dim)">${d.rate_annual_pct}%</span>
+      <span class="chile-dap-days ${daysClass}">${daysText}</span>
+    </div>`;
+  }).join('');
+
+  // Allocation detail
+  const allocOrder = ['dap_clp','fm_uf','dap_usd','etf_intl','acc_chile','cash'];
+  const allocColors = {dap_clp:'var(--accent)',fm_uf:'#44ccff',dap_usd:'#a78bfa',etf_intl:'#ffb84c',acc_chile:'#ff5f63',cash:'#666'};
+  const allocRows = allocOrder.map(k => {
+    const a = alloc[k];
+    if(!a) return '';
+    const deltaClr = Math.abs(a.delta) > 5 ? 'var(--danger)' : Math.abs(a.delta) > 3 ? 'var(--warn)' : 'var(--dim)';
+    return `<div class="chile-pos-row">
+      <span style="width:8px;height:8px;border-radius:1px;background:${allocColors[k]};flex-shrink:0;margin-right:4px"></span>
+      <span class="chile-pos-name">${a.name}</span>
+      <span style="min-width:40px;text-align:right;font-family:var(--mono);font-size:9px;color:var(--dim)">${a.target_pct}%</span>
+      <span style="min-width:40px;text-align:right;font-family:var(--mono);font-size:9px;color:var(--text)">${a.current_pct}%</span>
+      <span style="min-width:45px;text-align:right;font-family:var(--mono);font-size:9px;color:${deltaClr}">${a.delta>0?'+':''}${a.delta}%</span>
+    </div>`;
+  }).join('');
+
+  // Positions with prices
+  const positions = (p.positions || []).filter(pos => pos.ticker);
+  const posRows = positions.map(pos => {
+    const glClr = pos.gain_loss_pct > 0 ? 'var(--accent)' : pos.gain_loss_pct < 0 ? 'var(--danger)' : 'var(--dim)';
+    const glSign = pos.gain_loss_pct > 0 ? '+' : '';
+    return `<div class="chile-pos-row">
+      <span class="chile-pos-name" title="${pos.name}">${pos.ticker}</span>
+      <span class="chile-pos-val">$${pos.current_price||'--'}</span>
+      <span class="chile-pos-gl" style="color:${glClr}">${pos.gain_loss_pct!=null?(glSign+pos.gain_loss_pct+'%'):'--'}</span>
+    </div>`;
+  }).join('');
+
+  // Copper-CLP correlation
+  const corr = c.copperCorrelation?.copper_vs_usdclp_7d;
+
+  return `<div class="g-panel lp-ideas">
+    <div class="sec-head"><h3>Chile Detail</h3><span class="badge">PORTFOLIO</span></div>
+
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:4px">DAP TRACKER</div>
+    ${dapRows || '<div style="font-family:var(--mono);font-size:9px;color:var(--dim)">No DAPs</div>'}
+
+    <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">ALLOCATION <span style="font-size:8px;opacity:0.6">TARGET → ACTUAL → DELTA</span></div>
+    ${allocRows}
+
+    ${positions.length ? `<div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">POSITIONS</div>${posRows}` : ''}
+
+    ${corr != null ? `<div style="margin-top:10px">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px">COPPER-CLP CORRELATION</div>
+      <div style="font-family:var(--mono);font-size:12px;color:${corr > 0.3 ? 'var(--warn)' : 'var(--accent)'}">
+        ${corr > 0 ? '+' : ''}${corr} <span style="font-size:8px;color:var(--dim)">${corr < -0.3 ? 'Normal (inverse)' : corr > 0.3 ? 'Divergence!' : 'Neutral'}</span>
+      </div>
+    </div>` : ''}
+
+    <div class="disclosure">Portfolio monitoring tool. Not financial advice. Prices delayed.</div>
+  </div>`;
 }
 
 // === RIGHT RAIL ===
@@ -1515,11 +1678,22 @@ function renderRight(){
   }
   const deltaHtml = hasDelta ? deltaRows.join('') : `<div style="padding:12px;text-align:center;color:var(--dim);font-family:var(--mono);font-size:10px">${t('delta.noChanges','No changes since last sweep')}</div>`;
 
+  // Chile signals for right rail
+  const chileSigs = (D.chile?.signals||[]).filter(s=>s.type!=='tpm_current').slice(0,4);
+  const chileSignalsHtml = chileSigs.length ? `<div class="g-panel">
+    <div class="sec-head"><h3>Chile Alerts</h3><span class="badge" style="color:var(--warn)">CL</span></div>
+    ${chileSigs.map(s=>{
+      const cls = s.severity==='high'?'high':s.severity==='medium'?'medium':'info';
+      return `<div class="chile-signal-card ${cls}">${s.message}</div>`;
+    }).join('')}
+  </div>` : '';
+
   document.getElementById('rightRail').innerHTML=`
     <div class="g-panel right-signals">
       <div class="sec-head"><h3>${t('panels.crossSourceSignals','Cross-Source Signals')}</h3><span class="badge">${t('badges.worldview','WORLDVIEW')}</span></div>
       ${signals}
     </div>
+    ${chileSignalsHtml}
     ${mobile ? '' : buildOsintPanel('right-osint', 260)}
     <div class="g-panel right-core">
       <div class="sec-head"><h3>${t('panels.signalCore','Signal Core')}</h3><span class="badge">${t('badges.hotMetrics','HOT METRICS')}</span></div>
@@ -1551,6 +1725,7 @@ function runBoot(){
     {text:'&#9500;&#9472; '+t('boot.sourceGroup2','FRED · BLS · EIA · TREASURY · GSCPI'),delay:900},
     {text:'&#9500;&#9472; '+t('boot.sourceGroup3','TELEGRAM · SAFECAST · EPA · WHO · OFAC'),delay:1100},
     {text:'&#9492;&#9472; '+t('boot.sourceGroup4','GDELT · NOAA · PATENTS · BLUESKY · REDDIT'),delay:1300},
+    {text:'&#9500;&#9472; CHILE-USDCLP · CHILE-COPPER · CHILE-DAP · PORTFOLIO',delay:1500},
     {text:t('boot.sweepComplete','SWEEP COMPLETE — {ok}/{total} SOURCES').replace('{ok}',`<span class="count">${D.meta.sourcesOk}</span>`).replace('{total}',D.meta.sourcesQueried)+' <span class="ok">'+t('boot.ok','OK')+'</span>',delay:1700},
     {text:t('boot.acledLayer','ACLED CONFLICT LAYER')+': '+acledStatus,delay:1900},
     {text:t('boot.flightCorridors','FLIGHT CORRIDORS')+': <span class="ok">'+t('boot.active','ACTIVE')+'</span> &#183; '+t('boot.dualProjection','DUAL PROJECTION')+': <span class="ok">'+t('boot.ready','READY')+'</span>',delay:2100},

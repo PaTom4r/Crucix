@@ -580,6 +580,39 @@ export async function synthesize(data) {
   if (yfNatgas?.price) energy.natgas = yfNatgas.price;
   if (yfWti?.history?.length) energy.wtiRecent = yfWti.history.map(h => h.close);
 
+  // === Chile Portfolio ===
+  const chileUsdclp = data.sources['Chile-USDCLP'] || {};
+  const chileCopper = data.sources['Chile-Copper'] || {};
+  const chileDap = data.sources['Chile-DAP'] || {};
+  const portfolioData = data.sources['Portfolio-Tracker'] || {};
+  const chile = {
+    usdclp: chileUsdclp.usdclp || {},
+    indicators: chileUsdclp.indicators || {},
+    copper: chileCopper.copper || {},
+    copperCorrelation: chileCopper.correlation || {},
+    dap: {
+      rates: chileDap.rates || {},
+      trend: chileDap.trend || 'unknown',
+      portfolioDaps: chileDap.portfolio_daps || [],
+    },
+    portfolio: {
+      totalValueClp: portfolioData.total_value_clp || 0,
+      originalValueClp: portfolioData.original_value_clp || 0,
+      totalChangePct: portfolioData.total_change_pct || 0,
+      fx: portfolioData.fx || {},
+      allocation: portfolioData.allocation || {},
+      positions: portfolioData.positions || [],
+      rebalanceNeeded: portfolioData.rebalance_needed || false,
+      deviations: portfolioData.deviations || [],
+    },
+    signals: [
+      ...(chileUsdclp.signals || []),
+      ...(chileCopper.signals || []),
+      ...(chileDap.signals || []),
+      ...(portfolioData.signals || []),
+    ],
+  };
+
   // Fetch RSS
   const news = await fetchAllNews();
 
@@ -597,6 +630,7 @@ export async function synthesize(data) {
     tg: { posts: tgData.totalPosts || 0, urgent: tgUrgent, topPosts: tgTop },
     who, fred, energy, bls, treasury, gscpi, defense, noaa, epa, acled, gdelt, space, health, news,
     markets, // Live Yahoo Finance market data
+    chile, // Chile Portfolio data
     ideas: [], ideasSource: 'disabled',
     // newsFeed for ticker (merged RSS + GDELT + Telegram)
     newsFeed: buildNewsFeed(news, gdeltData, tgUrgent, tgTop),
