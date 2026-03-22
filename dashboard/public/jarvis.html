@@ -324,13 +324,21 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 /* === PORTFOLIO ZONE (hero section) === */
 #portfolioZone{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:10px;margin-top:10px;padding-bottom:4px}
 #portfolioZone .g-panel{border-top:2px solid var(--accent)}
-.pf-hero-val{font-family:var(--mono);font-size:28px;font-weight:700;letter-spacing:-0.03em;color:var(--accent)}
-.pf-hero-change{font-family:var(--mono);font-size:14px;margin-left:8px}
+.pf-hero-val{font-family:var(--mono);font-size:42px;font-weight:700;letter-spacing:-0.03em;color:var(--accent)}
+.pf-hero-change{font-family:var(--mono);font-size:18px;margin-left:8px}
 .pf-hero-change.up{color:var(--accent)}
 .pf-hero-change.down{color:var(--danger)}
-.pf-macro-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
-.pf-macro-item{font-family:var(--mono);font-size:10px;color:var(--dim)}
-.pf-macro-item .pf-mv{color:var(--text);font-weight:500;margin-left:3px}
+.pf-macro-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+.pf-macro-item{font-family:var(--mono);font-size:13px;color:var(--dim)}
+.pf-macro-item .pf-mv{color:var(--text);font-weight:600;font-size:15px;margin-left:4px}
+#portfolioZone .g-panel{padding:16px}
+#portfolioZone .sec-head h3{font-size:12px}
+#portfolioZone .badge{font-size:11px}
+#portfolioZone .chile-alloc-bar{height:20px;border-radius:4px}
+#portfolioZone .chile-legend-item{font-size:11px}
+#portfolioZone .chile-pos-row,#portfolioZone .chile-dap-row{font-size:12px;padding:4px 0}
+#portfolioZone .chile-pos-row span,#portfolioZone .chile-dap-row span{font-size:12px}
+#portfolioZone .chile-signal-card{font-size:11px;padding:7px 9px;line-height:1.5}
 .section-divider{display:flex;align-items:center;gap:12px;margin:8px 0 2px;padding:0 4px}
 .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(100,240,200,0.12),transparent)}
 .section-divider span{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--dim);white-space:nowrap;opacity:0.6}
@@ -673,7 +681,7 @@ function renderPortfolio(){
   // USD/CLP sparkline from 30d history
   const usdHist = (c.usdclp?.history_30d || []).map(h => h.close).filter(Boolean);
   const usdMax = Math.max(...usdHist), usdMin = Math.min(...usdHist);
-  const sparkHtml = usdHist.length > 2 ? `<div class="spark" style="height:24px;margin-top:6px">${usdHist.map(v => {
+  const sparkHtml = usdHist.length > 2 ? `<div class="spark" style="height:36px;margin-top:8px">${usdHist.map(v => {
     const pct = usdMax===usdMin ? 50 : ((v-usdMin)/(usdMax-usdMin))*100;
     return '<div class="spark-bar" style="height:'+Math.max(pct,5)+'%"></div>';
   }).join('')}</div>` : '';
@@ -691,7 +699,7 @@ function renderPortfolio(){
       <div class="pf-macro-item">UF <span class="pf-mv">${uf?fmtClp(uf):'--'}</span></div>
       <div class="pf-macro-item">TPM <span class="pf-mv">${tpm!=null?tpm+'%':'--'}</span></div>
     </div>
-    ${sparkHtml?`<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px">USD/CLP 30d</div>${sparkHtml}`:''}
+    ${sparkHtml?`<div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px">USD/CLP 30d</div>${sparkHtml}`:''}
   </div>`;
 
   // Panel 2: Allocation + Posiciones
@@ -708,7 +716,7 @@ function renderPortfolio(){
   const allocRows = allocOrder.map(k => {
     const a = alloc[k]; if(!a) return '';
     const deltaClr = Math.abs(a.delta) > 5 ? 'var(--danger)' : Math.abs(a.delta) > 3 ? 'var(--warn)' : 'var(--dim)';
-    return `<div class="chile-pos-row"><span style="width:6px;height:6px;border-radius:1px;background:${allocColors[k]};flex-shrink:0;margin-right:4px"></span><span class="chile-pos-name">${a.name}</span><span style="min-width:35px;text-align:right;font-family:var(--mono);font-size:9px;color:var(--dim)">${a.target_pct}%</span><span style="min-width:35px;text-align:right;font-family:var(--mono);font-size:9px;color:var(--text)">${a.current_pct}%</span><span style="min-width:40px;text-align:right;font-family:var(--mono);font-size:9px;color:${deltaClr}">${a.delta>0?'+':''}${a.delta}%</span></div>`;
+    return `<div class="chile-pos-row"><span style="width:8px;height:8px;border-radius:2px;background:${allocColors[k]};flex-shrink:0;margin-right:6px"></span><span class="chile-pos-name">${a.name}</span><span style="min-width:40px;text-align:right;color:var(--dim)">${a.target_pct}%</span><span style="min-width:40px;text-align:right;color:var(--text)">${a.current_pct}%</span><span style="min-width:45px;text-align:right;color:${deltaClr}">${a.delta>0?'+':''}${a.delta}%</span></div>`;
   }).join('');
 
   const positions = (p.positions || []).filter(pos => pos.ticker);
@@ -724,10 +732,10 @@ function renderPortfolio(){
     <div class="sec-head"><h3>${t('chile.allocation','ASIGNACIÓN')}</h3><span class="badge">${t('chile.positions','POSICIONES')}</span></div>
     <div class="chile-alloc-bar">${allocBar}</div>
     <div class="chile-legend">${legend}</div>
-    <div style="margin-top:6px;font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.5px;margin-bottom:2px">${t('chile.targetActualDelta','OBJETIVO → ACTUAL → DELTA')}</div>
+    <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.5px;margin-bottom:4px">${t('chile.targetActualDelta','OBJETIVO → ACTUAL → DELTA')}</div>
     ${allocRows}
-    ${positions.length ? `<div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.5px;margin-bottom:2px">${t('chile.positions','POSICIONES')}</div>${posRows}` : ''}
-    ${corr != null ? `<div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--dim)">${t('chile.copperCorrelation','CORR COBRE-CLP')}: <span style="color:${corr > 0.3 ? 'var(--warn)' : 'var(--accent)'}">${corr > 0 ? '+' : ''}${corr}</span> <span style="font-size:8px">${corr < -0.3 ? t('chile.normal','Normal') : corr > 0.3 ? t('chile.divergence','Divergencia!') : t('chile.neutral','Neutral')}</span></div>` : ''}
+    ${positions.length ? `<div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.5px;margin-bottom:4px">${t('chile.positions','POSICIONES')}</div>${posRows}` : ''}
+    ${corr != null ? `<div style="margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--dim)">${t('chile.copperCorrelation','CORR COBRE-CLP')}: <span style="color:${corr > 0.3 ? 'var(--warn)' : 'var(--accent)'}; font-size:14px">${corr > 0 ? '+' : ''}${corr}</span> <span style="font-size:10px">${corr < -0.3 ? t('chile.normal','Normal') : corr > 0.3 ? t('chile.divergence','Divergencia!') : t('chile.neutral','Neutral')}</span></div>` : ''}
   </div>`;
 
   // Panel 3: DAPs + Alertas
@@ -735,7 +743,7 @@ function renderPortfolio(){
   const dapRows = daps.map(d => {
     const daysClass = d.days_remaining <= 7 ? 'soon' : d.days_remaining < 0 ? 'matured' : '';
     const daysText = d.days_remaining < 0 ? t('chile.matured','VENCIDO') : d.days_remaining + t('chile.days','d');
-    return `<div class="chile-dap-row"><span class="chile-dap-name" title="${d.name}">${d.name}</span><span style="min-width:30px;text-align:right;color:var(--dim);font-size:9px">${d.rate_annual_pct}%</span><span class="chile-dap-days ${daysClass}">${daysText}</span></div>`;
+    return `<div class="chile-dap-row"><span class="chile-dap-name" title="${d.name}">${d.name}</span><span style="min-width:35px;text-align:right;color:var(--dim)">${d.rate_annual_pct}%</span><span class="chile-dap-days ${daysClass}">${daysText}</span></div>`;
   }).join('');
 
   const sigs = (c.signals||[]).filter(s=>s.type!=='tpm_current').slice(0,5).map(s=>{
@@ -745,9 +753,9 @@ function renderPortfolio(){
 
   const panel3 = `<div class="g-panel">
     <div class="sec-head"><h3>${t('chile.dapTracker','TRACKER DAP')}</h3><span class="badge">${t('chile.chileAlerts','ALERTAS')}</span></div>
-    ${dapRows || `<div style="font-family:var(--mono);font-size:9px;color:var(--dim)">${t('chile.noDaps','Sin DAPs')}</div>`}
-    ${sigs ? `<div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);letter-spacing:0.5px;margin-bottom:4px">${t('chile.chileAlerts','ALERTAS')}</div>${sigs}` : '<div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--dim);opacity:0.6">Sin alertas activas</div>'}
-    <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);opacity:0.4">${t('chile.disclosure','Herramienta de monitoreo. No es asesoría financiera.')}</div>
+    ${dapRows || `<div style="font-family:var(--mono);font-size:12px;color:var(--dim)">${t('chile.noDaps','Sin DAPs')}</div>`}
+    ${sigs ? `<div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:0.5px;margin-bottom:4px">${t('chile.chileAlerts','ALERTAS')}</div>${sigs}` : '<div style="margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--dim);opacity:0.6">Sin alertas activas</div>'}
+    <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);opacity:0.4">${t('chile.disclosure','Herramienta de monitoreo. No es asesoría financiera.')}</div>
   </div>`;
 
   el.innerHTML = panel1 + panel2 + panel3;
