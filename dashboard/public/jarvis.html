@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -739,7 +739,7 @@ function renderChilePanel(){
   const fmtClp = (n) => Math.round(n).toLocaleString('es-CL');
 
   return `<div class="g-panel">
-    <div class="sec-head"><h3>Chile Portfolio</h3><span class="badge">LIVE</span></div>
+    <div class="sec-head"><h3>${t('chile.portfolio','Chile Portfolio')}</h3><span class="badge">${t('badges.live','LIVE')}</span></div>
     <div style="display:flex;align-items:baseline;margin-bottom:6px">
       <span class="chile-total">$${totalM}M</span>
       <span class="chile-change ${chgClass}">${chgSign}${p.totalChangePct}%</span>
@@ -748,7 +748,7 @@ function renderChilePanel(){
     <div class="econ-row"><span class="elabel">Cobre</span><span class="eval" style="color:${(cuChg7d||0)<-5?'var(--danger)':'var(--text)'}">$${cu||'--'}/lb <span style="font-size:9px;color:var(--dim)">${cuChg7d?((cuChg7d>0?'+':'')+cuChg7d+'% 7d'):''}</span></span></div>
     <div class="econ-row"><span class="elabel">UF</span><span class="eval">${uf?fmtClp(uf):'--'}</span></div>
     <div class="econ-row"><span class="elabel">TPM</span><span class="eval">${tpm!=null?tpm+'%':'--'}</span></div>
-    <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px">ALLOCATION</div>
+    <div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px">${t('chile.allocation','ALLOCATION')}</div>
     <div class="chile-alloc-bar">${allocBar}</div>
     <div class="chile-legend">${legend}</div>
     ${sigs?`<div style="margin-top:6px">${sigs}</div>`:''}
@@ -1577,7 +1577,7 @@ function renderChileLowerPanel(){
   const daps = (c.dap?.portfolioDaps || []).filter(d => !d.error);
   const dapRows = daps.map(d => {
     const daysClass = d.days_remaining <= 7 ? 'soon' : d.days_remaining < 0 ? 'matured' : '';
-    const daysText = d.days_remaining < 0 ? 'VENCIDO' : d.days_remaining + 'd';
+    const daysText = d.days_remaining < 0 ? t('chile.matured','MATURED') : d.days_remaining + t('chile.days','d');
     return `<div class="chile-dap-row">
       <span class="chile-dap-name" title="${d.name}">${d.name}</span>
       <span style="min-width:35px;text-align:right;color:var(--dim)">${d.rate_annual_pct}%</span>
@@ -1617,24 +1617,24 @@ function renderChileLowerPanel(){
   const corr = c.copperCorrelation?.copper_vs_usdclp_7d;
 
   return `<div class="g-panel lp-ideas">
-    <div class="sec-head"><h3>Chile Detail</h3><span class="badge">PORTFOLIO</span></div>
+    <div class="sec-head"><h3>${t('chile.chileDetail','Chile Detail')}</h3><span class="badge">${t('chile.portfolio','PORTFOLIO')}</span></div>
 
-    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:4px">DAP TRACKER</div>
-    ${dapRows || '<div style="font-family:var(--mono);font-size:9px;color:var(--dim)">No DAPs</div>'}
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:4px">${t('chile.dapTracker','DAP TRACKER')}</div>
+    ${dapRows || `<div style="font-family:var(--mono);font-size:9px;color:var(--dim)">${t('chile.noDaps','No DAPs')}</div>`}
 
-    <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">ALLOCATION <span style="font-size:8px;opacity:0.6">TARGET → ACTUAL → DELTA</span></div>
+    <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">${t('chile.allocation','ALLOCATION')} <span style="font-size:8px;opacity:0.6">${t('chile.targetActualDelta','TARGET → ACTUAL → DELTA')}</span></div>
     ${allocRows}
 
-    ${positions.length ? `<div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">POSITIONS</div>${posRows}` : ''}
+    ${positions.length ? `<div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:2px">${t('chile.positions','POSITIONS')}</div>${posRows}` : ''}
 
     ${corr != null ? `<div style="margin-top:10px">
-      <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px">COPPER-CLP CORRELATION</div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:1px">${t('chile.copperCorrelation','COPPER-CLP CORRELATION')}</div>
       <div style="font-family:var(--mono);font-size:12px;color:${corr > 0.3 ? 'var(--warn)' : 'var(--accent)'}">
-        ${corr > 0 ? '+' : ''}${corr} <span style="font-size:8px;color:var(--dim)">${corr < -0.3 ? 'Normal (inverse)' : corr > 0.3 ? 'Divergence!' : 'Neutral'}</span>
+        ${corr > 0 ? '+' : ''}${corr} <span style="font-size:8px;color:var(--dim)">${corr < -0.3 ? t('chile.normal','Normal (inverse)') : corr > 0.3 ? t('chile.divergence','Divergence!') : t('chile.neutral','Neutral')}</span>
       </div>
     </div>` : ''}
 
-    <div class="disclosure">Portfolio monitoring tool. Not financial advice. Prices delayed.</div>
+    <div class="disclosure">${t('chile.disclosure','Portfolio monitoring tool. Not financial advice. Prices delayed.')}</div>
   </div>`;
 }
 
@@ -1681,7 +1681,7 @@ function renderRight(){
   // Chile signals for right rail
   const chileSigs = (D.chile?.signals||[]).filter(s=>s.type!=='tpm_current').slice(0,4);
   const chileSignalsHtml = chileSigs.length ? `<div class="g-panel">
-    <div class="sec-head"><h3>Chile Alerts</h3><span class="badge" style="color:var(--warn)">CL</span></div>
+    <div class="sec-head"><h3>${t('chile.chileAlerts','Chile Alerts')}</h3><span class="badge" style="color:var(--warn)">CL</span></div>
     ${chileSigs.map(s=>{
       const cls = s.severity==='high'?'high':s.severity==='medium'?'medium':'info';
       return `<div class="chile-signal-card ${cls}">${s.message}</div>`;
@@ -1725,7 +1725,7 @@ function runBoot(){
     {text:'&#9500;&#9472; '+t('boot.sourceGroup2','FRED · BLS · EIA · TREASURY · GSCPI'),delay:900},
     {text:'&#9500;&#9472; '+t('boot.sourceGroup3','TELEGRAM · SAFECAST · EPA · WHO · OFAC'),delay:1100},
     {text:'&#9492;&#9472; '+t('boot.sourceGroup4','GDELT · NOAA · PATENTS · BLUESKY · REDDIT'),delay:1300},
-    {text:'&#9500;&#9472; CHILE-USDCLP · CHILE-COPPER · CHILE-DAP · PORTFOLIO',delay:1500},
+    {text:'&#9500;&#9472; '+t('boot.sourceGroup7','CHILE-USDCLP · CHILE-COPPER · CHILE-DAP · PORTFOLIO'),delay:1500},
     {text:t('boot.sweepComplete','SWEEP COMPLETE — {ok}/{total} SOURCES').replace('{ok}',`<span class="count">${D.meta.sourcesOk}</span>`).replace('{total}',D.meta.sourcesQueried)+' <span class="ok">'+t('boot.ok','OK')+'</span>',delay:1700},
     {text:t('boot.acledLayer','ACLED CONFLICT LAYER')+': '+acledStatus,delay:1900},
     {text:t('boot.flightCorridors','FLIGHT CORRIDORS')+': <span class="ok">'+t('boot.active','ACTIVE')+'</span> &#183; '+t('boot.dualProjection','DUAL PROJECTION')+': <span class="ok">'+t('boot.ready','READY')+'</span>',delay:2100},
