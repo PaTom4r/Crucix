@@ -364,6 +364,10 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 .pf-alert.high{border-color:var(--danger);color:var(--danger)}
 .pf-alert.medium{border-color:var(--warn);color:var(--warn)}
 .pf-alert.info{border-color:var(--accent);color:var(--accent)}
+.pf-tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid var(--border)}
+.pf-tab{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;padding:8px 14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);cursor:pointer;transition:all 0.2s}
+.pf-tab:hover{color:var(--text)}
+.pf-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 @media(max-width:900px){.pf-bottom{grid-template-columns:1fr}.pf-hero-val{font-size:36px}}
 .section-divider{display:flex;align-items:center;gap:12px;margin:8px 0 2px;padding:0 4px}
 .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(100,240,200,0.12),transparent)}
@@ -686,6 +690,14 @@ function renderTopbar(){
   renderRegionControls();
 }
 
+// === PORTFOLIO TABS ===
+function pfToggleTab(btn, showId, hideId) {
+  document.getElementById(showId).style.display = 'block';
+  document.getElementById(hideId).style.display = 'none';
+  btn.parentElement.querySelectorAll('.pf-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 // === PORTFOLIO ZONE (hero section) ===
 function renderPortfolio(){
   const c = D.chile;
@@ -713,7 +725,28 @@ function renderPortfolio(){
     return `<div class="pf-chart-bar" style="height:${Math.max(pct,4)}%" title="${usdHist[i]?.date}: $${v}"></div>`;
   }).join('') : '';
 
-  // Panel top: Resumen + Gráfico + Macro
+  // Benchmarks comparison
+  const benchmarks = c.benchmarks || [];
+  const benchHtml = benchmarks.length ? benchmarks.map(b => {
+    const clr = b.ytdReturn >= 0 ? 'var(--accent)' : 'var(--danger)';
+    const sign = b.ytdReturn >= 0 ? '+' : '';
+    return `<div class="pf-macro-item"><span class="pf-macro-label">${b.name}</span><span class="pf-macro-val" style="color:${clr}">${sign}${b.ytdReturn}%</span></div>`;
+  }).join('') : '';
+
+  // Sentiment indicator
+  const sent = c.sentiment || {};
+  const sentScore = sent.score;
+  const sentDir = sent.direction || 'neutro';
+  const sentDots = sentScore != null ? Math.round((sentScore + 1) * 2.5) : 0; // 0-5 dots
+  const sentClr = sentDir === 'positivo' ? 'var(--accent)' : sentDir === 'negativo' ? 'var(--danger)' : 'var(--dim)';
+  const sentHtml = sentScore != null ? `<div style="display:flex;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(100,240,200,0.08)">
+    <span style="font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:0.06em">SENTIMIENTO</span>
+    <span style="font-family:var(--mono);font-size:14px;color:${sentClr};letter-spacing:2px">${'●'.repeat(Math.max(sentDots,0))}${'○'.repeat(Math.max(5-sentDots,0))}</span>
+    <span style="font-family:var(--mono);font-size:13px;color:${sentClr};font-weight:500">${sentDir.charAt(0).toUpperCase()+sentDir.slice(1)}</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--dim)">${sent.articlesAnalyzed||0} artículos</span>
+  </div>` : '';
+
+  // Panel top: Resumen + Gráfico + Macro + Benchmarks + Sentimiento
   const panelTop = `<div class="g-panel pf-top">
     <div class="sec-head"><h3>${t('chile.portfolio','Portafolio Chile')}</h3><span class="badge">${t('badges.live','EN VIVO')}</span></div>
     <div class="pf-hero-row">
@@ -742,6 +775,11 @@ function renderPortfolio(){
         <span class="pf-macro-val">${tpm!=null?tpm+'%':'--'}</span>
       </div>
     </div>
+    ${benchmarks.length ? `<div class="pf-macro-row" style="border-top-style:dashed">
+      <div class="pf-macro-item"><span class="pf-macro-label">Tu portafolio</span><span class="pf-macro-val" style="color:${p.totalChangePct>=0?'var(--accent)':'var(--danger)'}">YTD ${chgSign}${p.totalChangePct}%</span></div>
+      ${benchHtml}
+    </div>` : ''}
+    ${sentHtml}
   </div>`;
 
   // Panel bottom-left: Asignación
@@ -759,11 +797,27 @@ function renderPortfolio(){
     return `<div class="pf-alloc-row"><div class="pf-alloc-dot" style="background:${allocColors[k]}"></div><span class="pf-alloc-name">${a.name}</span><span class="pf-alloc-target">${a.target_pct}%</span><span class="pf-alloc-arrow">→</span><span class="pf-alloc-current">${a.current_pct}%</span></div>`;
   }).join('');
 
+  // Positions tab content
+  const positions = (p.positions || []).filter(pos => pos.ticker);
+  const posRows = positions.map(pos => {
+    const glClr = pos.gain_loss_pct > 0 ? 'var(--accent)' : pos.gain_loss_pct < 0 ? 'var(--danger)' : 'var(--dim)';
+    const glSign = pos.gain_loss_pct > 0 ? '+' : '';
+    return `<div class="pf-alloc-row"><span class="pf-alloc-name" title="${pos.name}">${pos.ticker || pos.name}</span><span style="min-width:60px;text-align:right;color:var(--text)">${pos.current_price ? '$'+pos.current_price : '$'+Math.round((pos.value_clp||0)/1000)+'K'}</span><span style="min-width:55px;text-align:right;color:${glClr}">${pos.gain_loss_pct!=null?(glSign+pos.gain_loss_pct+'%'):'--'}</span></div>`;
+  }).join('');
+
   const panelAlloc = `<div class="g-panel">
-    <div class="sec-head"><h3>${t('chile.allocation','ASIGNACIÓN')}</h3></div>
-    <div class="chile-alloc-bar">${allocBar}</div>
-    <div class="chile-legend">${legend}</div>
-    ${allocRows}
+    <div class="pf-tabs">
+      <button class="pf-tab active" onclick="pfToggleTab(this,'pf-alloc','pf-pos')">ASIGNACIÓN</button>
+      <button class="pf-tab" onclick="pfToggleTab(this,'pf-pos','pf-alloc')">POSICIONES</button>
+    </div>
+    <div id="pf-alloc">
+      <div class="chile-alloc-bar">${allocBar}</div>
+      <div class="chile-legend">${legend}</div>
+      ${allocRows}
+    </div>
+    <div id="pf-pos" style="display:none">
+      ${posRows || '<div style="font-family:var(--mono);font-size:13px;color:var(--dim)">Sin posiciones con ticker</div>'}
+    </div>
   </div>`;
 
   // Panel bottom-right: DAPs + Alertas

@@ -115,7 +115,7 @@ export async function briefing() {
     signals.push({
       type: 'copper_drop',
       severity: 'high',
-      message: `Copper futures down ${copper.change_7d_pct}% in 7 days`,
+      message: `Futuros de cobre cayeron ${copper.change_7d_pct}% en 7 días`,
     });
   }
 
@@ -128,7 +128,7 @@ export async function briefing() {
     signals.push({
       type: 'copper_clp_divergence',
       severity: 'medium',
-      message: `Copper and USD/CLP moving together (correlation ${correlation}) — unusual divergence`,
+      message: `Cobre y USD/CLP moviéndose juntos (correlación ${correlation}) — divergencia inusual`,
     });
   }
 

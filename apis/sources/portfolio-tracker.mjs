@@ -205,7 +205,7 @@ export async function briefing() {
     signals.push({
       type: 'rebalance_needed',
       severity: 'high',
-      message: `${deviations.length} asset class(es) outside ±${rebalanceBand}% band: ${deviations.map(d => `${d.name} (${d.delta > 0 ? '+' : ''}${d.delta}%)`).join(', ')}`,
+      message: `${deviations.length} clase(s) fuera de banda ±${rebalanceBand}%: ${deviations.map(d => `${d.name} (${d.delta > 0 ? '+' : ''}${d.delta}%)`).join(', ')}`,
     });
   }
 

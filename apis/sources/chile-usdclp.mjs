@@ -52,7 +52,10 @@ async function fetchUsdClp() {
 
 async function fetchMindicadores() {
   const data = await safeFetch(MINDICADORES, { timeout: 10000 });
-  if (data?.error) return { error: data.error };
+  if (data?.error) {
+    // Fallback: try to get UF from Yahoo Finance (CLF=X)
+    return fetchIndicatorsFallback();
+  }
 
   const pick = (key) => {
     const item = data?.[key];
@@ -70,6 +73,26 @@ async function fetchMindicadores() {
   };
 }
 
+async function fetchIndicatorsFallback() {
+  // UF from Yahoo Finance (CLFCLP=X = UF value in CLP)
+  const ufData = await safeFetch(`${YAHOO_BASE}/CLFCLP%3DX?range=5d&interval=1d&includePrePost=false`, {
+    timeout: 8000,
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+  });
+  const ufPrice = ufData?.chart?.result?.[0]?.meta?.regularMarketPrice;
+
+  return {
+    uf: ufPrice ? { value: Math.round(ufPrice * 100) / 100, unit: 'Pesos', date: new Date().toISOString().split('T')[0] } : null,
+    tpm: null,
+    ipc: null,
+    utm: null,
+    euro: null,
+    dolar: null,
+    copper_clp: null,
+    _fallback: true,
+  };
+}
+
 export async function briefing() {
   const [usdclp, indicators] = await Promise.all([
     fetchUsdClp(),
@@ -78,22 +101,22 @@ export async function briefing() {
 
   const signals = [];
 
-  // USD/CLP level alerts
+  // Alertas USD/CLP
   if (usdclp.current && usdclp.current > 1000) {
-    signals.push({ type: 'usdclp_high', severity: 'high', message: `USD/CLP at ${usdclp.current} — above $1,000 threshold` });
+    signals.push({ type: 'usdclp_high', severity: 'high', message: `USD/CLP en $${usdclp.current} — sobre umbral de $1.000` });
   }
   if (usdclp.current && usdclp.current < 850) {
-    signals.push({ type: 'usdclp_low', severity: 'medium', message: `USD/CLP at ${usdclp.current} — below $850 threshold` });
+    signals.push({ type: 'usdclp_low', severity: 'medium', message: `USD/CLP en $${usdclp.current} — bajo umbral de $850` });
   }
 
-  // Daily spike alert
+  // Alerta movimiento diario
   if (Math.abs(usdclp.change_pct) > 2) {
-    signals.push({ type: 'usdclp_spike', severity: 'high', message: `USD/CLP moved ${usdclp.change_pct > 0 ? '+' : ''}${usdclp.change_pct}% today` });
+    signals.push({ type: 'usdclp_spike', severity: 'high', message: `USD/CLP se movió ${usdclp.change_pct > 0 ? '+' : ''}${usdclp.change_pct}% hoy` });
   }
 
-  // TPM change detection (store last known in signal for dashboard to compare)
+  // TPM actual
   if (indicators.tpm?.value != null) {
-    signals.push({ type: 'tpm_current', severity: 'info', message: `TPM at ${indicators.tpm.value}%` });
+    signals.push({ type: 'tpm_current', severity: 'info', message: `TPM en ${indicators.tpm.value}%` });
   }
 
   return {

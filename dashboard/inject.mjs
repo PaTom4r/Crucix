@@ -585,6 +585,8 @@ export async function synthesize(data) {
   const chileCopper = data.sources['Chile-Copper'] || {};
   const chileDap = data.sources['Chile-DAP'] || {};
   const portfolioData = data.sources['Portfolio-Tracker'] || {};
+  const chileBenchmarks = data.sources['Chile-Benchmarks'] || {};
+  const chileSentiment = data.sources['Chile-Sentiment'] || {};
   const chile = {
     usdclp: chileUsdclp.usdclp || {},
     indicators: chileUsdclp.indicators || {},
@@ -605,11 +607,21 @@ export async function synthesize(data) {
       rebalanceNeeded: portfolioData.rebalance_needed || false,
       deviations: portfolioData.deviations || [],
     },
+    benchmarks: (chileBenchmarks.benchmarks || []).map(b => ({
+      name: b.name, ticker: b.ticker, ytdReturn: b.ytdReturn, currentPrice: b.currentPrice,
+    })),
+    sentiment: {
+      score: chileSentiment.keyword_score ?? null,
+      direction: chileSentiment.keyword_direction || 'neutro',
+      articlesAnalyzed: chileSentiment.articles_analyzed || 0,
+      mentions: (chileSentiment.chile_mentions || []).slice(0, 5),
+    },
     signals: [
       ...(chileUsdclp.signals || []),
       ...(chileCopper.signals || []),
       ...(chileDap.signals || []),
       ...(portfolioData.signals || []),
+      ...(chileSentiment.signals || []),
     ],
   };
 

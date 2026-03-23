@@ -125,14 +125,14 @@ export async function briefing() {
       signals.push({
         type: 'dap_renewal_alert',
         severity: 'high',
-        message: `${dap.name} matures in ${dap.days_remaining} days (${dap.maturity_date})`,
+        message: `${dap.name} vence en ${dap.days_remaining} días (${dap.maturity_date})`,
       });
     }
     if (dap.status === 'matured') {
       signals.push({
         type: 'dap_matured',
         severity: 'high',
-        message: `${dap.name} has matured — renew or reallocate`,
+        message: `${dap.name} venció — renovar o reasignar`,
       });
     }
   }
@@ -142,7 +142,7 @@ export async function briefing() {
     signals.push({
       type: 'dap_curve_inverted',
       severity: 'medium',
-      message: 'Short-term DAP rates exceed long-term — inverted yield curve',
+      message: 'Tasas DAP corto plazo superan largo plazo — curva invertida',
     });
   }
 

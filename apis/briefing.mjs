@@ -52,6 +52,8 @@ import { briefing as chileUsdclp } from './sources/chile-usdclp.mjs';
 import { briefing as chileCopper } from './sources/chile-copper.mjs';
 import { briefing as chileDap } from './sources/chile-dap.mjs';
 import { briefing as portfolioTracker } from './sources/portfolio-tracker.mjs';
+import { briefing as chileBenchmarks } from './sources/chile-benchmarks.mjs';
+import { briefing as chileSentiment } from './sources/chile-sentiment.mjs';
 
 const SOURCE_TIMEOUT_MS = 30_000; // 30s max per individual source
 
@@ -123,6 +125,8 @@ export async function fullBriefing() {
     runSource('Chile-Copper', chileCopper),
     runSource('Chile-DAP', chileDap),
     runSource('Portfolio-Tracker', portfolioTracker),
+    runSource('Chile-Benchmarks', chileBenchmarks),
+    runSource('Chile-Sentiment', chileSentiment),
   ];
 
   // Each runSource has its own 30s timeout, so allSettled will resolve
