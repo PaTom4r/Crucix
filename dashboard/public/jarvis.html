@@ -326,22 +326,25 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 #portfolioZone .g-panel{border-top:2px solid var(--accent);padding:20px}
 .pf-top{width:100%}
 .pf-top-inner{display:flex;gap:24px}
-.pf-top-chart{flex:1.3;min-width:0}
-.pf-top-macro{flex:1;display:flex;flex-direction:column;gap:12px;padding-left:20px;border-left:1px solid rgba(100,240,200,0.08)}
+.pf-top-chart{flex:2.3;min-width:0}
+.pf-top-macro{flex:1;display:flex;flex-direction:column;gap:14px;padding-left:24px;border-left:1px solid rgba(100,240,200,0.08)}
 .pf-bottom{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pf-hero-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
 .pf-hero-val{font-family:var(--mono);font-size:48px;font-weight:700;letter-spacing:-0.03em;color:var(--accent)}
 .pf-hero-change{font-family:var(--mono);font-size:20px}
 .pf-hero-change.up{color:var(--accent)}
 .pf-hero-change.down{color:var(--danger)}
-.pf-chart-area{position:relative;width:100%;height:140px;margin:8px 0}
+.pf-chart-wrap{margin-bottom:12px}
+.pf-chart-title{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:500;margin-bottom:2px}
+.pf-chart-subtitle{font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:6px}
+.pf-chart-area{position:relative;width:100%;height:130px}
 .pf-chart-svg{width:100%;height:100%}
-.pf-chart-legend{display:flex;gap:16px;font-family:var(--mono);font-size:10px;margin-top:4px}
-.pf-chart-legend-item{display:flex;align-items:center;gap:4px}
-.pf-chart-legend-dot{width:12px;height:3px;border-radius:1px}
-.pf-macro-item{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0}
-.pf-macro-label{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:0.04em}
-.pf-macro-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text)}
+.pf-chart-price-tag{position:absolute;right:0;top:0;font-family:var(--mono);font-size:22px;font-weight:700;padding:4px 10px;border-radius:4px}
+.pf-chart-minmax{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:2px}
+.pf-chart-dates{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:1px}
+.pf-macro-item{display:flex;flex-direction:column;gap:1px;padding:2px 0}
+.pf-macro-label{font-family:var(--mono);font-size:13px;color:var(--dim);letter-spacing:0.04em}
+.pf-macro-val{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--text)}
 .pf-bench-row{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid rgba(100,240,200,0.08)}
 .pf-bench-item{font-family:var(--mono);font-size:12px;color:var(--dim)}
 .pf-bench-item .pf-bv{font-weight:600;margin-left:4px}
@@ -726,44 +729,72 @@ function renderPortfolio(){
   const uf = c.indicators?.uf?.value;
   const tpm = c.indicators?.tpm?.value;
 
-  // Build SVG comparative chart: USD/CLP (green) vs SPY normalized (gray)
+  // Build readable price charts with labels
   const usdHist = (c.usdclp?.history_30d || []).filter(h => h.close);
   const spyBench = (c.benchmarks || []).find(b => b.ticker === 'SPY');
   const spyHist = spyBench?.history || [];
 
-  // Normalize both series to % change from first value (for comparison)
-  const normalize = (arr) => {
-    if(arr.length < 2) return [];
-    const base = arr[0];
-    return arr.map(v => ((v - base) / base) * 100);
-  };
-  const usdCloses = usdHist.map(h => h.close);
-  const spyCloses = spyHist.map(h => h.close);
-  const usdNorm = normalize(usdCloses);
-  const spyNorm = normalize(spyCloses);
-
-  // SVG chart dimensions
-  const W = 500, H = 140, PAD = 2;
-  let chartSvg = '';
-  if(usdNorm.length > 2) {
-    const allVals = [...usdNorm, ...spyNorm];
-    const minV = Math.min(...allVals), maxV = Math.max(...allVals);
+  // Helper: build SVG line chart with price axis and reference lines
+  function buildPriceChart(data, opts) {
+    const { color, fillColor, prefix, suffix } = opts;
+    if(data.length < 3) return '';
+    const W = 500, H = 120, LEFT = 50, RIGHT = 10, TOP = 5, BOT = 5;
+    const vals = data.map(d => d.close);
+    const minV = Math.min(...vals), maxV = Math.max(...vals);
     const range = maxV - minV || 1;
-    const toPath = (vals) => {
-      const stepX = (W - PAD*2) / (vals.length - 1);
-      return vals.map((v, i) => {
-        const x = PAD + i * stepX;
-        const y = H - PAD - ((v - minV) / range) * (H - PAD*2);
-        return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-      }).join(' ');
-    };
-    // Zero line
-    const zeroY = H - PAD - ((0 - minV) / range) * (H - PAD*2);
-    const zeroLine = `<line x1="${PAD}" y1="${zeroY.toFixed(1)}" x2="${W-PAD}" y2="${zeroY.toFixed(1)}" stroke="rgba(100,240,200,0.1)" stroke-dasharray="4,4"/>`;
-    const usdPath = `<path d="${toPath(usdNorm)}" fill="none" stroke="var(--accent)" stroke-width="2.5" opacity="0.9"/>`;
-    const spyPath = spyNorm.length > 2 ? `<path d="${toPath(spyNorm)}" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6"/>` : '';
-    chartSvg = `<svg class="pf-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${zeroLine}${spyPath}${usdPath}</svg>`;
+
+    // Y axis: 3-4 reference lines with price labels
+    const steps = 3;
+    const gridLines = [];
+    for(let i = 0; i <= steps; i++) {
+      const v = minV + (range * i / steps);
+      const y = H - BOT - ((v - minV) / range) * (H - TOP - BOT);
+      const label = prefix + Math.round(v).toLocaleString('es-CL') + (suffix||'');
+      gridLines.push(`<line x1="${LEFT}" y1="${y.toFixed(1)}" x2="${W-RIGHT}" y2="${y.toFixed(1)}" stroke="rgba(100,240,200,0.08)" />`);
+      gridLines.push(`<text x="${LEFT-6}" y="${(y+3).toFixed(1)}" text-anchor="end" fill="rgba(200,220,215,0.5)" font-family="var(--mono)" font-size="10">${label}</text>`);
+    }
+
+    // Line path
+    const chartW = W - LEFT - RIGHT;
+    const chartH = H - TOP - BOT;
+    const pathPts = vals.map((v, i) => {
+      const x = LEFT + (i / (vals.length - 1)) * chartW;
+      const y = H - BOT - ((v - minV) / range) * chartH;
+      return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+
+    // Fill area under line
+    const lastX = LEFT + chartW;
+    const fillPath = pathPts + ` L${lastX},${H-BOT} L${LEFT},${H-BOT} Z`;
+
+    // Date labels (first and last)
+    const firstDate = data[0]?.date?.slice(5) || '';
+    const lastDate = data[data.length-1]?.date?.slice(5) || '';
+
+    return `<svg class="pf-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      ${gridLines.join('')}
+      <path d="${fillPath}" fill="${fillColor}" />
+      <path d="${pathPts}" fill="none" stroke="${color}" stroke-width="2.5" />
+      <text x="${LEFT}" y="${H}" fill="rgba(200,220,215,0.4)" font-family="var(--mono)" font-size="9">${firstDate}</text>
+      <text x="${W-RIGHT}" y="${H}" text-anchor="end" fill="rgba(200,220,215,0.4)" font-family="var(--mono)" font-size="9">${lastDate}</text>
+    </svg>`;
   }
+
+  // Chart 1: Dólar en Chile (precio real)
+  const usdChartSvg = buildPriceChart(usdHist, {
+    color: usdChg > 0 ? 'var(--danger)' : 'var(--accent)',
+    fillColor: usdChg > 0 ? 'rgba(255,95,99,0.08)' : 'rgba(100,240,200,0.08)',
+    prefix: '$', suffix: '',
+  });
+  const usdMin = usdHist.length ? Math.min(...usdHist.map(h=>h.close)) : 0;
+  const usdMax = usdHist.length ? Math.max(...usdHist.map(h=>h.close)) : 0;
+
+  // Chart 2: S&P 500 (precio real en USD)
+  const spyChartSvg = buildPriceChart(spyHist, {
+    color: '#44ccff',
+    fillColor: 'rgba(68,204,255,0.06)',
+    prefix: '$', suffix: '',
+  });
 
   // Sentiment
   const sent = c.sentiment || {};
@@ -789,20 +820,34 @@ function renderPortfolio(){
     </div>
     <div class="pf-top-inner">
       <div class="pf-top-chart">
-        ${chartSvg ? `
-          <div class="pf-chart-area">${chartSvg}</div>
-          <div class="pf-chart-legend">
-            <div class="pf-chart-legend-item"><div class="pf-chart-legend-dot" style="background:var(--accent)"></div><span style="color:var(--dim)">USD/CLP 30d</span></div>
-            ${spyNorm.length > 2 ? '<div class="pf-chart-legend-item"><div class="pf-chart-legend-dot" style="background:#888"></div><span style="color:var(--dim)">S&P 500</span></div>' : ''}
+        ${usdChartSvg ? `
+          <div class="pf-chart-wrap">
+            <div class="pf-chart-title">Dólar en Chile — últimos 30 días</div>
+            <div class="pf-chart-subtitle">Precio real del dólar en pesos chilenos${usdChg ? ` (${usdChg > 0 ? 'subió' : 'bajó'} ${Math.abs(usdChg)}% hoy)` : ''}</div>
+            <div class="pf-chart-area">
+              ${usdChartSvg}
+              <div class="pf-chart-price-tag" style="color:${(usdChg||0)>0?'var(--danger)':'var(--accent)'}">$${usd||'--'}</div>
+            </div>
+            <div class="pf-chart-minmax"><span>Mínimo: $${fmtClp(usdMin)}</span><span>Máximo: $${fmtClp(usdMax)}</span></div>
           </div>
-        ` : '<div style="font-family:var(--mono);font-size:12px;color:var(--dim);padding:20px 0">Sin datos de gráfico</div>'}
+        ` : ''}
+        ${spyChartSvg ? `
+          <div class="pf-chart-wrap">
+            <div class="pf-chart-title">S&P 500 — últimos 30 días</div>
+            <div class="pf-chart-subtitle">Índice de las 500 empresas más grandes de EEUU</div>
+            <div class="pf-chart-area">
+              ${spyChartSvg}
+              <div class="pf-chart-price-tag" style="color:#44ccff">$${spyBench?.currentPrice||'--'}</div>
+            </div>
+          </div>
+        ` : ''}
       </div>
       <div class="pf-top-macro">
-        <div class="pf-macro-item"><span class="pf-macro-label">USD/CLP</span><span class="pf-macro-val" style="color:${Math.abs(usdChg||0)>2?'var(--warn)':'var(--accent)'}">$${usd||'--'}</span></div>
+        <div class="pf-macro-item"><span class="pf-macro-label">Dólar</span><span class="pf-macro-val" style="color:${Math.abs(usdChg||0)>2?'var(--warn)':'var(--accent)'}">$${usd||'--'}</span></div>
         <div class="pf-macro-item"><span class="pf-macro-label">Cobre</span><span class="pf-macro-val" style="color:${(cuChg7d||0)<-5?'var(--danger)':'var(--text)'}">$${cu||'--'}/lb</span></div>
-        <div class="pf-macro-item"><span class="pf-macro-label">UF</span><span class="pf-macro-val">${uf?'$'+fmtClp(uf):'--'}</span></div>
-        <div class="pf-macro-item"><span class="pf-macro-label">TPM</span><span class="pf-macro-val">${tpm!=null?tpm+'%':'No disponible'}</span></div>
-        ${sentScore != null ? `<div class="pf-macro-item"><span class="pf-macro-label">Sentimiento</span><span style="font-family:var(--mono);font-size:14px;color:${sentClr};letter-spacing:2px">${'●'.repeat(Math.max(sentDots,0))}${'○'.repeat(Math.max(5-sentDots,0))}</span></div>` : ''}
+        <div class="pf-macro-item"><span class="pf-macro-label">Valor UF</span><span class="pf-macro-val">${uf?'$'+fmtClp(uf):'--'}</span></div>
+        <div class="pf-macro-item"><span class="pf-macro-label">Tasa del Banco Central</span><span class="pf-macro-val">${tpm!=null?tpm+'%':'No disponible'}</span></div>
+        ${sentScore != null ? `<div class="pf-macro-item"><span class="pf-macro-label">Sentimiento noticias</span><span style="font-family:var(--mono);font-size:18px;color:${sentClr};letter-spacing:2px">${'●'.repeat(Math.max(sentDots,0))}${'○'.repeat(Math.max(5-sentDots,0))}</span></div>` : ''}
       </div>
     </div>
     ${benchmarks.length ? `<div class="pf-bench-row">
