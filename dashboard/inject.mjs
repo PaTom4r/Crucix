@@ -609,6 +609,7 @@ export async function synthesize(data) {
     },
     benchmarks: (chileBenchmarks.benchmarks || []).map(b => ({
       name: b.name, ticker: b.ticker, ytdReturn: b.ytdReturn, currentPrice: b.currentPrice,
+      history: b.history || [],
     })),
     sentiment: {
       score: chileSentiment.keyword_score ?? null,

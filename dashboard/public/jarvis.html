@@ -325,34 +325,38 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 #portfolioZone{display:flex;flex-direction:column;gap:10px;margin-top:10px;padding-bottom:4px}
 #portfolioZone .g-panel{border-top:2px solid var(--accent);padding:20px}
 .pf-top{width:100%}
+.pf-top-inner{display:flex;gap:24px}
+.pf-top-chart{flex:1.3;min-width:0}
+.pf-top-macro{flex:1;display:flex;flex-direction:column;gap:12px;padding-left:20px;border-left:1px solid rgba(100,240,200,0.08)}
 .pf-bottom{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.pf-hero-row{display:flex;align-items:baseline;justify-content:space-between}
+.pf-hero-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
 .pf-hero-val{font-family:var(--mono);font-size:48px;font-weight:700;letter-spacing:-0.03em;color:var(--accent)}
 .pf-hero-change{font-family:var(--mono);font-size:20px}
 .pf-hero-change.up{color:var(--accent)}
 .pf-hero-change.down{color:var(--danger)}
-.pf-chart{width:100%;height:80px;margin:16px 0;display:flex;align-items:flex-end;gap:2px;padding:8px 0;border-bottom:1px solid rgba(100,240,200,0.08)}
-.pf-chart-bar{flex:1;background:var(--accent);opacity:0.6;border-radius:2px 2px 0 0;min-width:2px;transition:opacity 0.2s}
-.pf-chart-bar:hover{opacity:1}
-.pf-chart-bar:last-child{opacity:1;background:var(--accent)}
-.pf-chart-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim)}
-.pf-chart-price{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)}
-.pf-macro-row{display:flex;gap:28px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid rgba(100,240,200,0.08)}
-.pf-macro-item{display:flex;flex-direction:column;gap:2px}
-.pf-macro-label{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:0.06em}
+.pf-chart-area{position:relative;width:100%;height:140px;margin:8px 0}
+.pf-chart-svg{width:100%;height:100%}
+.pf-chart-legend{display:flex;gap:16px;font-family:var(--mono);font-size:10px;margin-top:4px}
+.pf-chart-legend-item{display:flex;align-items:center;gap:4px}
+.pf-chart-legend-dot{width:12px;height:3px;border-radius:1px}
+.pf-macro-item{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0}
+.pf-macro-label{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:0.04em}
 .pf-macro-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text)}
+.pf-bench-row{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid rgba(100,240,200,0.08)}
+.pf-bench-item{font-family:var(--mono);font-size:12px;color:var(--dim)}
+.pf-bench-item .pf-bv{font-weight:600;margin-left:4px}
 #portfolioZone .sec-head h3{font-size:13px}
 #portfolioZone .badge{font-size:11px}
 #portfolioZone .chile-alloc-bar{height:24px;border-radius:4px;margin:10px 0}
 #portfolioZone .chile-legend-item{font-size:11px;gap:5px}
 #portfolioZone .chile-legend{gap:10px 16px;margin:6px 0 12px}
-.pf-alloc-row{display:flex;align-items:center;padding:6px 0;border-bottom:1px solid rgba(100,240,200,0.05);font-family:var(--mono);font-size:13px}
-.pf-alloc-row:last-child{border-bottom:none}
-.pf-alloc-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;margin-right:10px}
-.pf-alloc-name{flex:1;color:var(--text)}
-.pf-alloc-target{min-width:40px;text-align:right;color:var(--dim)}
-.pf-alloc-arrow{margin:0 6px;color:var(--dim)}
-.pf-alloc-current{min-width:40px;text-align:right;color:var(--text);font-weight:500}
+.pf-alloc-block{padding:8px 0;border-bottom:1px solid rgba(100,240,200,0.05)}
+.pf-alloc-block:last-child{border-bottom:none}
+.pf-alloc-block-name{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px}
+.pf-alloc-block-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.pf-alloc-detail{display:flex;gap:20px;padding-left:18px;font-family:var(--mono);font-size:12px}
+.pf-alloc-detail span{color:var(--dim)}
+.pf-alloc-detail strong{color:var(--text);font-weight:500}
 .pf-dap-row{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(100,240,200,0.05);font-family:var(--mono);font-size:13px}
 .pf-dap-row:last-child{border-bottom:none}
 .pf-dap-name{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -364,11 +368,17 @@ body.low-perf .ticker-wrap::-webkit-scrollbar-thumb{background:rgba(100,240,200,
 .pf-alert.high{border-color:var(--danger);color:var(--danger)}
 .pf-alert.medium{border-color:var(--warn);color:var(--warn)}
 .pf-alert.info{border-color:var(--accent);color:var(--accent)}
+.pf-pos-row{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid rgba(100,240,200,0.05);font-family:var(--mono);font-size:13px}
+.pf-pos-row:last-child{border-bottom:none}
+.pf-pos-ticker{min-width:80px;color:var(--accent);font-weight:500}
+.pf-pos-name{flex:1;color:var(--dim);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf-pos-price{min-width:60px;text-align:right;color:var(--text)}
+.pf-pos-gl{min-width:55px;text-align:right;font-weight:500}
 .pf-tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid var(--border)}
 .pf-tab{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;padding:8px 14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);cursor:pointer;transition:all 0.2s}
 .pf-tab:hover{color:var(--text)}
 .pf-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-@media(max-width:900px){.pf-bottom{grid-template-columns:1fr}.pf-hero-val{font-size:36px}}
+@media(max-width:900px){.pf-bottom{grid-template-columns:1fr}.pf-top-inner{flex-direction:column}.pf-top-macro{border-left:none;padding-left:0;border-top:1px solid rgba(100,240,200,0.08);padding-top:12px}.pf-hero-val{font-size:36px}}
 .section-divider{display:flex;align-items:center;gap:12px;margin:8px 0 2px;padding:0 4px}
 .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(100,240,200,0.12),transparent)}
 .section-divider span{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:var(--dim);white-space:nowrap;opacity:0.6}
@@ -716,73 +726,92 @@ function renderPortfolio(){
   const uf = c.indicators?.uf?.value;
   const tpm = c.indicators?.tpm?.value;
 
-  // USD/CLP chart from 30d history
+  // Build SVG comparative chart: USD/CLP (green) vs SPY normalized (gray)
   const usdHist = (c.usdclp?.history_30d || []).filter(h => h.close);
-  const closes = usdHist.map(h => h.close);
-  const usdMax = Math.max(...closes), usdMin = Math.min(...closes);
-  const chartBars = closes.length > 2 ? closes.map((v,i) => {
-    const pct = usdMax===usdMin ? 50 : ((v-usdMin)/(usdMax-usdMin))*100;
-    return `<div class="pf-chart-bar" style="height:${Math.max(pct,4)}%" title="${usdHist[i]?.date}: $${v}"></div>`;
-  }).join('') : '';
+  const spyBench = (c.benchmarks || []).find(b => b.ticker === 'SPY');
+  const spyHist = spyBench?.history || [];
 
-  // Benchmarks comparison
-  const benchmarks = c.benchmarks || [];
-  const benchHtml = benchmarks.length ? benchmarks.map(b => {
-    const clr = b.ytdReturn >= 0 ? 'var(--accent)' : 'var(--danger)';
-    const sign = b.ytdReturn >= 0 ? '+' : '';
-    return `<div class="pf-macro-item"><span class="pf-macro-label">${b.name}</span><span class="pf-macro-val" style="color:${clr}">${sign}${b.ytdReturn}%</span></div>`;
-  }).join('') : '';
+  // Normalize both series to % change from first value (for comparison)
+  const normalize = (arr) => {
+    if(arr.length < 2) return [];
+    const base = arr[0];
+    return arr.map(v => ((v - base) / base) * 100);
+  };
+  const usdCloses = usdHist.map(h => h.close);
+  const spyCloses = spyHist.map(h => h.close);
+  const usdNorm = normalize(usdCloses);
+  const spyNorm = normalize(spyCloses);
 
-  // Sentiment indicator
+  // SVG chart dimensions
+  const W = 500, H = 140, PAD = 2;
+  let chartSvg = '';
+  if(usdNorm.length > 2) {
+    const allVals = [...usdNorm, ...spyNorm];
+    const minV = Math.min(...allVals), maxV = Math.max(...allVals);
+    const range = maxV - minV || 1;
+    const toPath = (vals) => {
+      const stepX = (W - PAD*2) / (vals.length - 1);
+      return vals.map((v, i) => {
+        const x = PAD + i * stepX;
+        const y = H - PAD - ((v - minV) / range) * (H - PAD*2);
+        return `${i===0?'M':'L'}${x.toFixed(1)},${y.toFixed(1)}`;
+      }).join(' ');
+    };
+    // Zero line
+    const zeroY = H - PAD - ((0 - minV) / range) * (H - PAD*2);
+    const zeroLine = `<line x1="${PAD}" y1="${zeroY.toFixed(1)}" x2="${W-PAD}" y2="${zeroY.toFixed(1)}" stroke="rgba(100,240,200,0.1)" stroke-dasharray="4,4"/>`;
+    const usdPath = `<path d="${toPath(usdNorm)}" fill="none" stroke="var(--accent)" stroke-width="2.5" opacity="0.9"/>`;
+    const spyPath = spyNorm.length > 2 ? `<path d="${toPath(spyNorm)}" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6"/>` : '';
+    chartSvg = `<svg class="pf-chart-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${zeroLine}${spyPath}${usdPath}</svg>`;
+  }
+
+  // Sentiment
   const sent = c.sentiment || {};
   const sentScore = sent.score;
   const sentDir = sent.direction || 'neutro';
-  const sentDots = sentScore != null ? Math.round((sentScore + 1) * 2.5) : 0; // 0-5 dots
+  const sentDots = sentScore != null ? Math.round((sentScore + 1) * 2.5) : 0;
   const sentClr = sentDir === 'positivo' ? 'var(--accent)' : sentDir === 'negativo' ? 'var(--danger)' : 'var(--dim)';
-  const sentHtml = sentScore != null ? `<div style="display:flex;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(100,240,200,0.08)">
-    <span style="font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:0.06em">SENTIMIENTO</span>
-    <span style="font-family:var(--mono);font-size:14px;color:${sentClr};letter-spacing:2px">${'●'.repeat(Math.max(sentDots,0))}${'○'.repeat(Math.max(5-sentDots,0))}</span>
-    <span style="font-family:var(--mono);font-size:13px;color:${sentClr};font-weight:500">${sentDir.charAt(0).toUpperCase()+sentDir.slice(1)}</span>
-    <span style="font-family:var(--mono);font-size:11px;color:var(--dim)">${sent.articlesAnalyzed||0} artículos</span>
-  </div>` : '';
 
-  // Panel top: Resumen + Gráfico + Macro + Benchmarks + Sentimiento
+  // Benchmarks
+  const benchmarks = c.benchmarks || [];
+  const benchHtml = benchmarks.map(b => {
+    const clr = b.ytdReturn >= 0 ? 'var(--accent)' : 'var(--danger)';
+    const sign = b.ytdReturn >= 0 ? '+' : '';
+    return `<span class="pf-bench-item">${b.name} <span class="pf-bv" style="color:${clr}">${sign}${b.ytdReturn}%</span></span>`;
+  }).join('');
+
+  // Panel top: Gráfico comparativo (izq) + Macro (der)
   const panelTop = `<div class="g-panel pf-top">
     <div class="sec-head"><h3>${t('chile.portfolio','Portafolio Chile')}</h3><span class="badge">${t('badges.live','EN VIVO')}</span></div>
     <div class="pf-hero-row">
       <span class="pf-hero-val">$${totalM}M <span style="font-size:18px;color:var(--dim);font-weight:400">CLP</span></span>
       <span class="pf-hero-change ${chgClass}">${chgSign}${p.totalChangePct}%</span>
     </div>
-    ${chartBars ? `
-      <div class="pf-chart-label"><span>USD/CLP 30 días</span><span class="pf-chart-price">$${usd||'--'}</span></div>
-      <div class="pf-chart">${chartBars}</div>
-    ` : ''}
-    <div class="pf-macro-row">
-      <div class="pf-macro-item">
-        <span class="pf-macro-label">USD/CLP</span>
-        <span class="pf-macro-val" style="color:${Math.abs(usdChg||0)>2?'var(--warn)':'var(--accent)'}">$${usd||'--'}</span>
+    <div class="pf-top-inner">
+      <div class="pf-top-chart">
+        ${chartSvg ? `
+          <div class="pf-chart-area">${chartSvg}</div>
+          <div class="pf-chart-legend">
+            <div class="pf-chart-legend-item"><div class="pf-chart-legend-dot" style="background:var(--accent)"></div><span style="color:var(--dim)">USD/CLP 30d</span></div>
+            ${spyNorm.length > 2 ? '<div class="pf-chart-legend-item"><div class="pf-chart-legend-dot" style="background:#888"></div><span style="color:var(--dim)">S&P 500</span></div>' : ''}
+          </div>
+        ` : '<div style="font-family:var(--mono);font-size:12px;color:var(--dim);padding:20px 0">Sin datos de gráfico</div>'}
       </div>
-      <div class="pf-macro-item">
-        <span class="pf-macro-label">Cobre</span>
-        <span class="pf-macro-val" style="color:${(cuChg7d||0)<-5?'var(--danger)':'var(--text)'}">$${cu||'--'}/lb</span>
-      </div>
-      <div class="pf-macro-item">
-        <span class="pf-macro-label">UF</span>
-        <span class="pf-macro-val">${uf?'$'+fmtClp(uf):'--'}</span>
-      </div>
-      <div class="pf-macro-item">
-        <span class="pf-macro-label">TPM</span>
-        <span class="pf-macro-val">${tpm!=null?tpm+'%':'--'}</span>
+      <div class="pf-top-macro">
+        <div class="pf-macro-item"><span class="pf-macro-label">USD/CLP</span><span class="pf-macro-val" style="color:${Math.abs(usdChg||0)>2?'var(--warn)':'var(--accent)'}">$${usd||'--'}</span></div>
+        <div class="pf-macro-item"><span class="pf-macro-label">Cobre</span><span class="pf-macro-val" style="color:${(cuChg7d||0)<-5?'var(--danger)':'var(--text)'}">$${cu||'--'}/lb</span></div>
+        <div class="pf-macro-item"><span class="pf-macro-label">UF</span><span class="pf-macro-val">${uf?'$'+fmtClp(uf):'--'}</span></div>
+        <div class="pf-macro-item"><span class="pf-macro-label">TPM</span><span class="pf-macro-val">${tpm!=null?tpm+'%':'No disponible'}</span></div>
+        ${sentScore != null ? `<div class="pf-macro-item"><span class="pf-macro-label">Sentimiento</span><span style="font-family:var(--mono);font-size:14px;color:${sentClr};letter-spacing:2px">${'●'.repeat(Math.max(sentDots,0))}${'○'.repeat(Math.max(5-sentDots,0))}</span></div>` : ''}
       </div>
     </div>
-    ${benchmarks.length ? `<div class="pf-macro-row" style="border-top-style:dashed">
-      <div class="pf-macro-item"><span class="pf-macro-label">Tu portafolio</span><span class="pf-macro-val" style="color:${p.totalChangePct>=0?'var(--accent)':'var(--danger)'}">YTD ${chgSign}${p.totalChangePct}%</span></div>
+    ${benchmarks.length ? `<div class="pf-bench-row">
+      <span class="pf-bench-item">Tu portafolio <span class="pf-bv" style="color:${p.totalChangePct>=0?'var(--accent)':'var(--danger)'}">YTD ${chgSign}${p.totalChangePct}%</span></span>
       ${benchHtml}
     </div>` : ''}
-    ${sentHtml}
   </div>`;
 
-  // Panel bottom-left: Asignación
+  // Panel bottom-left: Asignación (labels claros)
   const alloc = p.allocation || {};
   const allocOrder = ['dap_clp','fm_uf','dap_usd','etf_intl','acc_chile','cash'];
   const allocColors = {dap_clp:'var(--accent)',fm_uf:'#44ccff',dap_usd:'#a78bfa',etf_intl:'#ffb84c',acc_chile:'#ff5f63',cash:'#666'};
@@ -792,35 +821,22 @@ function renderPortfolio(){
   }).join('');
   const legendItems = [{c:'var(--accent)',l:'DAP CLP'},{c:'#44ccff',l:'FM UF'},{c:'#a78bfa',l:'DAP USD'},{c:'#ffb84c',l:'ETF Intl'},{c:'#ff5f63',l:'Acc CL'},{c:'#666',l:'Cash'}];
   const legend = legendItems.map(x=>`<div class="chile-legend-item"><div class="chile-legend-dot" style="background:${x.c}"></div>${x.l}</div>`).join('');
-  const allocRows = allocOrder.map(k => {
+  const allocBlocks = allocOrder.map(k => {
     const a = alloc[k]; if(!a) return '';
-    return `<div class="pf-alloc-row"><div class="pf-alloc-dot" style="background:${allocColors[k]}"></div><span class="pf-alloc-name">${a.name}</span><span class="pf-alloc-target">${a.target_pct}%</span><span class="pf-alloc-arrow">→</span><span class="pf-alloc-current">${a.current_pct}%</span></div>`;
-  }).join('');
-
-  // Positions tab content
-  const positions = (p.positions || []).filter(pos => pos.ticker);
-  const posRows = positions.map(pos => {
-    const glClr = pos.gain_loss_pct > 0 ? 'var(--accent)' : pos.gain_loss_pct < 0 ? 'var(--danger)' : 'var(--dim)';
-    const glSign = pos.gain_loss_pct > 0 ? '+' : '';
-    return `<div class="pf-alloc-row"><span class="pf-alloc-name" title="${pos.name}">${pos.ticker || pos.name}</span><span style="min-width:60px;text-align:right;color:var(--text)">${pos.current_price ? '$'+pos.current_price : '$'+Math.round((pos.value_clp||0)/1000)+'K'}</span><span style="min-width:55px;text-align:right;color:${glClr}">${pos.gain_loss_pct!=null?(glSign+pos.gain_loss_pct+'%'):'--'}</span></div>`;
+    return `<div class="pf-alloc-block">
+      <div class="pf-alloc-block-name"><div class="pf-alloc-block-dot" style="background:${allocColors[k]}"></div>${a.name}</div>
+      <div class="pf-alloc-detail"><span>Objetivo: <strong>${a.target_pct}%</strong></span><span>Actual: <strong>${a.current_pct}%</strong></span></div>
+    </div>`;
   }).join('');
 
   const panelAlloc = `<div class="g-panel">
-    <div class="pf-tabs">
-      <button class="pf-tab active" onclick="pfToggleTab(this,'pf-alloc','pf-pos')">ASIGNACIÓN</button>
-      <button class="pf-tab" onclick="pfToggleTab(this,'pf-pos','pf-alloc')">POSICIONES</button>
-    </div>
-    <div id="pf-alloc">
-      <div class="chile-alloc-bar">${allocBar}</div>
-      <div class="chile-legend">${legend}</div>
-      ${allocRows}
-    </div>
-    <div id="pf-pos" style="display:none">
-      ${posRows || '<div style="font-family:var(--mono);font-size:13px;color:var(--dim)">Sin posiciones con ticker</div>'}
-    </div>
+    <div class="sec-head"><h3>ASIGNACIÓN</h3></div>
+    <div class="chile-alloc-bar">${allocBar}</div>
+    <div class="chile-legend">${legend}</div>
+    ${allocBlocks}
   </div>`;
 
-  // Panel bottom-right: DAPs + Alertas
+  // Panel bottom-right: Tabs DAPs+Alertas ↔ Posiciones
   const daps = (c.dap?.portfolioDaps || []).filter(d => !d.error);
   const dapRows = daps.map(d => {
     const daysClass = d.days_remaining <= 7 ? 'soon' : d.days_remaining < 0 ? 'matured' : '';
@@ -833,13 +849,28 @@ function renderPortfolio(){
     return `<div class="pf-alert ${cls}">${s.message}</div>`;
   }).join('');
 
-  const panelDaps = `<div class="g-panel">
-    <div class="sec-head"><h3>DEPÓSITOS A PLAZO</h3></div>
-    ${dapRows || `<div style="font-family:var(--mono);font-size:13px;color:var(--dim)">Sin depósitos activos</div>`}
-    ${sigs ? `<div style="margin-top:14px"><div style="font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:0.1em;margin-bottom:8px">ALERTAS</div>${sigs}</div>` : ''}
+  const positions = (p.positions || []).filter(pos => pos.ticker);
+  const posRows = positions.map(pos => {
+    const glClr = pos.gain_loss_pct > 0 ? 'var(--accent)' : pos.gain_loss_pct < 0 ? 'var(--danger)' : 'var(--dim)';
+    const glSign = pos.gain_loss_pct > 0 ? '+' : '';
+    return `<div class="pf-pos-row"><span class="pf-pos-ticker">${pos.ticker}</span><span class="pf-pos-name">${pos.name}</span><span class="pf-pos-price">${pos.current_price ? '$'+pos.current_price : '--'}</span><span class="pf-pos-gl" style="color:${glClr}">${pos.gain_loss_pct!=null?(glSign+pos.gain_loss_pct+'%'):'--'}</span></div>`;
+  }).join('');
+
+  const panelRight = `<div class="g-panel">
+    <div class="pf-tabs">
+      <button class="pf-tab active" onclick="pfToggleTab(this,'pf-daps','pf-pos')">DEPÓSITOS + ALERTAS</button>
+      <button class="pf-tab" onclick="pfToggleTab(this,'pf-pos','pf-daps')">POSICIONES</button>
+    </div>
+    <div id="pf-daps">
+      ${dapRows || '<div style="font-family:var(--mono);font-size:13px;color:var(--dim)">Sin depósitos activos</div>'}
+      ${sigs ? `<div style="margin-top:14px"><div style="font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:0.1em;margin-bottom:8px">ALERTAS</div>${sigs}</div>` : ''}
+    </div>
+    <div id="pf-pos" style="display:none">
+      ${posRows || '<div style="font-family:var(--mono);font-size:13px;color:var(--dim)">Sin posiciones con ticker</div>'}
+    </div>
   </div>`;
 
-  el.innerHTML = panelTop + `<div class="pf-bottom">${panelAlloc}${panelDaps}</div>`;
+  el.innerHTML = panelTop + `<div class="pf-bottom">${panelAlloc}${panelRight}</div>`;
 }
 
 // === LEFT RAIL ===

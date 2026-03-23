@@ -14,7 +14,7 @@ const BENCHMARKS = [
 ];
 
 async function fetchYtdReturn(ticker) {
-  // Get YTD range
+  // Get YTD range for return calculation + 1mo for chart
   const now = new Date();
   const yearStart = new Date(now.getFullYear(), 0, 1);
   const period1 = Math.floor(yearStart.getTime() / 1000);
@@ -41,22 +41,15 @@ async function fetchYtdReturn(ticker) {
 
   const ytdReturn = ((currentPrice - firstClose) / firstClose) * 100;
 
-  // Build weekly history for mini sparkline
+  // Build daily history
   const history = [];
-  for (let i = 0; i < timestamps.length; i += 5) { // weekly samples
+  for (let i = 0; i < timestamps.length; i++) {
     if (closes[i] != null) {
       history.push({
         date: new Date(timestamps[i] * 1000).toISOString().split('T')[0],
         close: Math.round(closes[i] * 100) / 100,
       });
     }
-  }
-  // Always include the last point
-  if (closes[closes.length - 1] != null) {
-    history.push({
-      date: new Date(timestamps[timestamps.length - 1] * 1000).toISOString().split('T')[0],
-      close: Math.round(closes[closes.length - 1] * 100) / 100,
-    });
   }
 
   return {
